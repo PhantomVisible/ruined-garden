@@ -1,0 +1,1 @@
+import{B as e}from"./DE1BKoXS.js";e();

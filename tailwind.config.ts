@@ -1,7 +1,7 @@
 import type { Config } from 'tailwindcss';
 
 export default {
-  content: ['./index.html', './src/**/*.{js,ts,svelte}'],
+  content: ['./src/**/*.{js,ts,svelte,html}'],
   theme: {
     extend: {
       colors: {
