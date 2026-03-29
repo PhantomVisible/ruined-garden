@@ -160,9 +160,9 @@ body {
 }
 
 .cat-easter-egg {
-  position: fixed;
-  left: 0.9rem;
-  top: 58%;
+  position: absolute;
+  right: 1.5rem;
+  top: -45px;
   z-index: 45;
   opacity: 0;
   pointer-events: none;
@@ -357,6 +357,39 @@ h3 {
   animation: float 3s ease-in-out infinite;
 }
 
+/* Sleepy Zs Animation */
+@keyframes float-z {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) scale(0.8);
+  }
+  20% {
+    opacity: 0.8;
+  }
+  80% {
+    opacity: 0.6;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(10px, -20px) scale(1.2);
+  }
+}
+
+.sleepy-zs .z1 {
+  animation: float-z 3s ease-in-out infinite;
+  animation-delay: 0s;
+}
+
+.sleepy-zs .z2 {
+  animation: float-z 3s ease-in-out infinite;
+  animation-delay: 1s;
+}
+
+.sleepy-zs .z3 {
+  animation: float-z 3s ease-in-out infinite;
+  animation-delay: 2s;
+}
+
 /* Mobile fallback for fixed/parallax layers */
 @media (max-width: 768px), (hover: none), (pointer: coarse) {
   .fixed-parallax {
@@ -364,8 +397,8 @@ h3 {
   }
 
   .cat-easter-egg {
-    left: 0.25rem;
-    top: 64%;
+    right: 0.5rem;
+    top: -30px;
     transform: scale(0.85);
   }
 

@@ -5,6 +5,7 @@
   import GrowingIvy from '$lib/components/GrowingIvy.svelte';
   import CrumblingWall from '$lib/components/CrumblingWall.svelte';
   import ZelligeTile from '$lib/components/ZelligeTile.svelte';
+  import Hero from '$lib/components/Hero.svelte';
 
   const heroImage = '/assets/the-garden-early-evening.webp';
   const feastImage = '/assets/the-garden-at-night-photo.webp';
@@ -95,14 +96,11 @@
 
 <!-- Global Vine (Scrollytelling spine) -->
 <GrowingIvy />
-<div bind:this={catEgg} class="cat-easter-egg" aria-hidden="true">
-  <svg viewBox="0 0 120 120" width="84" height="84" role="presentation">
-    <path fill="#0f1f18" d="M28 87c0-17 11-31 26-35V34l8 9 8-9v18c15 4 26 18 26 35v14H28V87zm15-8h8v22h-8V79zm26 0h8v22h-8V79zM44 68c2 0 4-2 4-4s-2-4-4-4-4 2-4 4 2 4 4 4zm32 0c2 0 4-2 4-4s-2-4-4-4-4 2-4 4 2 4 4 4z"></path>
-  </svg>
-</div>
 
 <main bind:this={rootEl} class="site-shell bg-stone-50 text-stone-900 overflow-x-hidden selection:bg-gold-300 selection:text-forest-900">
   
+  <Hero />
+
   <!-- Chapter I: The Sanctuary Found -->
   <section aria-labelledby="chapter-ruin" class="relative min-h-screen flex flex-col items-center justify-center text-center px-4 py-20 overflow-hidden chapter-shell">
     <img
@@ -154,7 +152,16 @@
 
   <!-- Chapter III: The Guardians of the Medina -->
   <section id="guardians" aria-labelledby="chapter-guardians" class="relative min-h-screen bg-stone-100 py-32 flex flex-col items-center justify-center chapter-shell">
-    <div class="max-w-4xl mx-auto px-4 text-center z-10 mb-12 story-panel">
+    <div class="max-w-4xl mx-auto px-4 text-center z-10 mb-12 story-panel relative">
+      <div bind:this={catEgg} class="cat-easter-egg" aria-hidden="true">
+        <img 
+          src="/assets/sleeping-cat.svg" 
+          alt="Sleeping Cat" 
+          width="84" 
+          height="84" 
+          class="opacity-90 mix-blend-multiply drop-shadow-sm"
+        />
+      </div>
       <p class="chapter-eyebrow mb-8">Chapter III: The Guardians of the Medina</p>
       <h2 id="chapter-guardians" class="font-display text-5xl md:text-7xl text-terracotta-800 mb-8 chapter-title">Shadows in the Garden.</h2>
       <div class="luxury-divider mx-auto mb-8"></div>

@@ -1,7 +1,6 @@
 <script>
   import { onMount } from 'svelte';
   import gsap from 'gsap';
-  import { ChevronDown } from 'lucide-svelte';
 
   let heroSection;
   let titleElement;
@@ -28,26 +27,7 @@
         ease: 'power2.out',
       });
     }
-
-    // Floating animation for chevron
-    const chevron = ctaButton?.querySelector('svg');
-    if (chevron) {
-      gsap.to(chevron, {
-        duration: 1.5,
-        y: 8,
-        repeat: -1,
-        yoyo: true,
-        ease: 'sine.inOut',
-      });
-    }
   });
-
-  const scrollToChapterI = () => {
-    const chapterI = document.getElementById('chapter-i');
-    if (chapterI) {
-      chapterI.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
 </script>
 
 <section
@@ -66,25 +46,27 @@
 
   <!-- Content -->
   <div class="relative z-10 text-center px-4 md:px-8 max-w-4xl">
+    <p class="chapter-eyebrow text-gold-400/80 mb-6 tracking-[0.3em]">Welcome to</p>
     <h1
       bind:this={titleElement}
-      class="font-display font-light text-6xl md:text-8xl text-gold-400 mb-6 tracking-wider leading-tight"
+      class="font-display font-light text-6xl md:text-8xl text-gold-400 mb-6 tracking-wider leading-tight drop-shadow-lg"
     >
-      The Garden<br />That Time<br />Forgot
+      The Ruined<br />Garden
     </h1>
 
-    <p class="text-lg md:text-xl text-stone-300 mb-12 font-light tracking-wide max-w-2xl mx-auto">
+    <p class="text-lg md:text-xl text-stone-300 mb-12 font-light tracking-wide max-w-2xl mx-auto drop-shadow-md">
       Discover a secret oasis hidden within the ancient Medina of Fes. Where nature reclaims the ruins, and every meal is a journey through time.
     </p>
 
-    <button
+    <a
       bind:this={ctaButton}
-      on:click={scrollToChapterI}
-      class="group relative inline-flex items-center justify-center px-8 py-4 border-2 border-gold-600 text-gold-400 hover:text-forest-900 hover:bg-gold-600 transition-all duration-300 ease-out"
+      href="https://www.google.com/maps/search/?api=1&query=The+Ruined+Garden+Fes"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="group relative inline-flex items-center justify-center px-8 py-4 border border-gold-600/50 bg-gold-600/10 text-gold-300 hover:text-forest-900 hover:bg-gold-500 hover:border-gold-500 transition-all duration-500 ease-out backdrop-blur-sm rounded-sm"
     >
-      <span class="font-display text-lg font-light tracking-wide">Discover the Secret</span>
-      <ChevronDown class="ml-3 w-5 h-5 group-hover:translate-y-1 transition-transform" />
-    </button>
+      <span class="font-sans font-medium text-[0.95rem] tracking-[0.15em] uppercase">Come Visit Us</span>
+    </a>
   </div>
 
   <!-- Scroll indicator -->
