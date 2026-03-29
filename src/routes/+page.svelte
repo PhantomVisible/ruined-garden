@@ -3,9 +3,9 @@
   import gsap from 'gsap';
   import { ScrollTrigger } from 'gsap/dist/ScrollTrigger';
   import GrowingIvy from '$lib/components/GrowingIvy.svelte';
-  import CrumblingWall from '$lib/components/CrumblingWall.svelte';
   import ZelligeTile from '$lib/components/ZelligeTile.svelte';
   import Hero from '$lib/components/Hero.svelte';
+  import CrumbleCard from '$lib/components/CrumbleCard.svelte';
 
   const heroImage = '/assets/the-garden-early-evening.webp';
   const feastImage = '/assets/the-garden-at-night-photo.webp';
@@ -114,64 +114,75 @@
     />
     <div class="absolute inset-0 bg-stone-100/80"></div>
     <div class="grain-overlay"></div>
-    <div class="max-w-5xl mx-auto z-10 relative animate-fade-in animate-slide-up story-panel">
-      <p class="chapter-eyebrow">Chapter I: The Sanctuary Found</p>
-      <h1 id="chapter-ruin" class="font-display text-5xl md:text-7xl lg:text-8xl text-forest-800 mb-6 leading-tight chapter-title">
-        A Secret Map to the Soul of Fes.
-      </h1>
-      <div class="luxury-divider mx-auto mb-12"></div>
-      <div data-story-block class="font-sans text-xl text-stone-700 leading-relaxed max-w-3xl mx-auto drop-shadow-sm font-medium text-left md:text-center space-y-4">
-        <p class="story-sentence">Five minutes from the chaos of Talaa Seghira, time begins to slow.</p>
-        <p class="story-sentence">Follow the hand-painted signs through the labyrinth of the Medina until the stone gives way to a hidden gate.</p>
-        <p class="story-sentence">Here, a 14th-century merchant’s palace has been reclaimed by the earth.</p>
-        <p class="story-sentence">We are a ruin, yes, but a living one.</p>
-        <p class="story-sentence">Whether you find us by the light of a log fire in the winter salon or under the wide-brimmed shade of a summer sun hat, the garden is always waiting.</p>
-      </div>
+    <div class="max-w-5xl mx-auto z-10 relative animate-fade-in animate-slide-up w-full px-4">
+      <CrumbleCard>
+        <div class="story-panel">
+          <p class="chapter-eyebrow">Chapter I: The Sanctuary Found</p>
+          <h1 id="chapter-ruin" class="font-display text-5xl md:text-7xl lg:text-8xl text-forest-800 mb-6 leading-tight chapter-title">
+            A Secret Map to the Soul of Fes.
+          </h1>
+          <div class="luxury-divider mx-auto mb-12"></div>
+          <div data-story-block class="font-sans text-xl text-stone-700 leading-relaxed max-w-3xl mx-auto drop-shadow-sm font-medium text-left md:text-center space-y-4">
+            <p class="story-sentence">Five minutes from the chaos of Talaa Seghira, time begins to slow.</p>
+            <p class="story-sentence">Follow the hand-painted signs through the labyrinth of the Medina until the stone gives way to a hidden gate.</p>
+            <p class="story-sentence">Here, a 14th-century merchant’s palace has been reclaimed by the earth.</p>
+            <p class="story-sentence">We are a ruin, yes, but a living one.</p>
+            <p class="story-sentence">Whether you find us by the light of a log fire in the winter salon or under the wide-brimmed shade of a summer sun hat, the garden is always waiting.</p>
+          </div>
+        </div>
+      </CrumbleCard>
     </div>
   </section>
 
   <!-- Chapter II: The Alchemist’s Table -->
-  <section id="history" aria-labelledby="chapter-history" class="relative">
-    <CrumblingWall />
-    <div class="absolute inset-x-0 bottom-0 z-20 px-4 pb-14">
-      <div class="max-w-4xl mx-auto chapter-card p-6 md:p-10">
-        <p class="chapter-eyebrow text-center">Chapter II: The Alchemist's Table</p>
-        <h2 class="font-display text-4xl md:text-6xl text-terracotta-800 mb-6 text-center chapter-title">Of Fire and Slow Time.</h2>
-        <div class="luxury-divider mx-auto mb-8"></div>
-        <div data-story-block class="font-sans text-stone-700 text-lg md:text-xl leading-relaxed space-y-4">
-          <p class="story-sentence">Our kitchen breathes with the seasons.</p>
-          <p class="story-sentence">At midday, we serve the vibrant pulse of the street, tapas and pastries dusted with sugar and history.</p>
-          <p class="story-sentence">But as the shadows lengthen across the Zellige, the real magic begins.</p>
-          <p class="story-sentence">This is the home of the <span class="practical-word">7-hour lamb</span>, a dish that cannot be rushed, only coaxed into perfection.</p>
-          <p class="story-sentence">Sip on chilled milk infused with date and orange blossom, or a sharp cucumber-mint tonic.</p>
-          <p class="story-sentence">We serve no spirits here; the garden provides all the intoxication you require.</p>
-        </div>
+  <section id="history" aria-labelledby="chapter-history" class="relative py-20 min-h-[80vh] flex items-center justify-center">
+    <div class="relative z-20 px-4 w-full">
+      <div class="max-w-4xl mx-auto">
+        <CrumbleCard>
+          <div class="chapter-card p-6 md:p-10">
+            <p class="chapter-eyebrow text-center">Chapter II: The Alchemist's Table</p>
+            <h2 class="font-display text-4xl md:text-6xl text-terracotta-800 mb-6 text-center chapter-title">Of Fire and Slow Time.</h2>
+            <div class="luxury-divider mx-auto mb-8"></div>
+            <div data-story-block class="font-sans text-stone-700 text-lg md:text-xl leading-relaxed space-y-4">
+              <p class="story-sentence">Our kitchen breathes with the seasons.</p>
+              <p class="story-sentence">At midday, we serve the vibrant pulse of the street, tapas and pastries dusted with sugar and history.</p>
+              <p class="story-sentence">But as the shadows lengthen across the Zellige, the real magic begins.</p>
+              <p class="story-sentence">This is the home of the <span class="practical-word">7-hour lamb</span>, a dish that cannot be rushed, only coaxed into perfection.</p>
+              <p class="story-sentence">Sip on chilled milk infused with date and orange blossom, or a sharp cucumber-mint tonic.</p>
+              <p class="story-sentence">We serve no spirits here; the garden provides all the intoxication you require.</p>
+            </div>
+          </div>
+        </CrumbleCard>
       </div>
     </div>
   </section>
 
   <!-- Chapter III: The Guardians of the Medina -->
   <section id="guardians" aria-labelledby="chapter-guardians" class="relative min-h-screen bg-stone-100 py-32 flex flex-col items-center justify-center chapter-shell">
-    <div class="max-w-4xl mx-auto px-4 text-center z-10 mb-12 story-panel relative">
-      <div bind:this={catEgg} class="cat-easter-egg" aria-hidden="true">
-        <img 
-          src="/assets/sleeping-cat.svg" 
-          alt="Sleeping Cat" 
-          width="84" 
-          height="84" 
-          class="opacity-90 mix-blend-multiply drop-shadow-sm"
-        />
-      </div>
-      <p class="chapter-eyebrow mb-8">Chapter III: The Guardians of the Medina</p>
-      <h2 id="chapter-guardians" class="font-display text-5xl md:text-7xl text-terracotta-800 mb-8 chapter-title">Shadows in the Garden.</h2>
-      <div class="luxury-divider mx-auto mb-8"></div>
-      <div data-story-block class="font-sans text-stone-700 text-lg md:text-xl leading-relaxed max-w-3xl mx-auto space-y-4">
-        <p class="story-sentence">You may see them, the silent, amber-eyed watchers of the Medina.</p>
-        <p class="story-sentence">The stray cats of Fes are our ancient pest-control and our companions.</p>
-        <p class="story-sentence">While we feed them at the gates and keep their water bowls full, we ask that you let them remain wild within our walls.</p>
-        <p class="story-sentence">Behind the scenes, our human family works with the same quiet grace.</p>
-        <p class="story-sentence">At The Ruined Garden, every gratuity goes directly to the hands that prepared your tea and the hearts that tend the hearth.</p>
-      </div>
+    <div class="max-w-4xl mx-auto px-4 w-full text-center z-10 mb-12">
+      <CrumbleCard>
+        <div class="story-panel relative">
+          <div bind:this={catEgg} class="cat-easter-egg" aria-hidden="true">
+            <img 
+              src="/assets/sleeping-cat.svg" 
+              alt="Sleeping Cat" 
+              width="84" 
+              height="84" 
+              class="opacity-90 mix-blend-multiply drop-shadow-sm"
+            />
+          </div>
+          <p class="chapter-eyebrow mb-8">Chapter III: The Guardians of the Medina</p>
+          <h2 id="chapter-guardians" class="font-display text-5xl md:text-7xl text-terracotta-800 mb-8 chapter-title">Shadows in the Garden.</h2>
+          <div class="luxury-divider mx-auto mb-8"></div>
+          <div data-story-block class="font-sans text-stone-700 text-lg md:text-xl leading-relaxed max-w-3xl mx-auto space-y-4">
+            <p class="story-sentence">You may see them, the silent, amber-eyed watchers of the Medina.</p>
+            <p class="story-sentence">The stray cats of Fes are our ancient pest-control and our companions.</p>
+            <p class="story-sentence">While we feed them at the gates and keep their water bowls full, we ask that you let them remain wild within our walls.</p>
+            <p class="story-sentence">Behind the scenes, our human family works with the same quiet grace.</p>
+            <p class="story-sentence">At The Ruined Garden, every gratuity goes directly to the hands that prepared your tea and the hearts that tend the hearth.</p>
+          </div>
+        </div>
+      </CrumbleCard>
     </div>
     
     <ZelligeTile />
@@ -189,19 +200,23 @@
       sizes="100vw"
     />
     <div class="grain-overlay"></div>
-    <div class="relative z-10 max-w-3xl mx-auto story-panel-dark">
-      <p class="chapter-eyebrow text-gold-100/80 mb-7">Chapter IV: The Guided Return</p>
-      <h2 id="chapter-feast" class="font-display text-5xl md:text-8xl text-gold-400 mb-8 glow-effect chapter-title">The Way Home.</h2>
-      <div class="luxury-divider mx-auto mb-10"></div>
-      <div data-story-block class="font-sans text-xl md:text-2xl text-stone-200 leading-relaxed mb-16 space-y-5">
-        <p class="story-sentence">The Medina is a beautiful maze, but you need never feel lost.</p>
-        <p class="story-sentence">For a few dirhams, our <span class="practical-word">Escort Service</span> will meet you at your riad and guide you through the starlit alleys to our door.</p>
-        <p class="story-sentence">And when the feast is done, we make sure you return safely.</p>
-        <p class="story-sentence">During the high seasons of light and bloom, our tables fill quickly. Secure your place in the story before the garden closes its gates for the night.</p>
-      </div>
-      <button class="cta-luxury focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-300 focus-visible:ring-offset-2 focus-visible:ring-offset-forest-900">
-        Reserve Your Table
-      </button>
+    <div class="relative z-10 w-full max-w-3xl mx-auto">
+      <CrumbleCard>
+        <div class="story-panel-dark">
+          <p class="chapter-eyebrow text-gold-100/80 mb-7">Chapter IV: The Guided Return</p>
+          <h2 id="chapter-feast" class="font-display text-5xl md:text-8xl text-gold-400 mb-8 glow-effect chapter-title">The Way Home.</h2>
+          <div class="luxury-divider mx-auto mb-10"></div>
+          <div data-story-block class="font-sans text-xl md:text-2xl text-stone-200 leading-relaxed mb-16 space-y-5">
+            <p class="story-sentence">The Medina is a beautiful maze, but you need never feel lost.</p>
+            <p class="story-sentence">For a few dirhams, our <span class="practical-word">Escort Service</span> will meet you at your riad and guide you through the starlit alleys to our door.</p>
+            <p class="story-sentence">And when the feast is done, we make sure you return safely.</p>
+            <p class="story-sentence">During the high seasons of light and bloom, our tables fill quickly. Secure your place in the story before the garden closes its gates for the night.</p>
+          </div>
+          <button class="cta-luxury focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-300 focus-visible:ring-offset-2 focus-visible:ring-offset-forest-900">
+            Reserve Your Table
+          </button>
+        </div>
+      </CrumbleCard>
     </div>
   </section>
   
