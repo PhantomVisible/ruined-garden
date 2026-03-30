@@ -39,6 +39,16 @@ function deferred() {
 		reject
 	};
 }
+/**
+* @template V
+* @param {V} value
+* @param {V | (() => V)} fallback
+* @param {boolean} [lazy]
+* @returns {V}
+*/
+function fallback(value, fallback, lazy = false) {
+	return value === void 0 ? lazy ? fallback() : fallback : value;
+}
 //#endregion
 //#region node_modules/svelte/src/internal/client/reactivity/equality.js
 /** @import { Equals } from '#client' */
@@ -99,6 +109,13 @@ globalThis.document?.contentType;
 */
 function experimental_async_required(name) {
 	throw new Error(`https://svelte.dev/e/experimental_async_required`);
+}
+/**
+* Cannot use `{@render children(...)}` if the parent component uses `let:` directives. Consider using a named snippet instead
+* @returns {never}
+*/
+function invalid_default_snippet() {
+	throw new Error(`https://svelte.dev/e/invalid_default_snippet`);
 }
 /**
 * `%name%(...)` can only be used during component initialisation
@@ -1096,7 +1113,7 @@ function createSubscriber(start) {
 	let stop;
 	return () => {
 		if (effect_tracking()) {
-			get(version);
+			get$1(version);
 			render_effect(() => {
 				if (subscribers === 0) stop = untrack(() => start(() => increment(version)));
 				subscribers += 1;
@@ -1361,7 +1378,7 @@ var Boundary = class {
 	}
 	get_effect_pending() {
 		this.#effect_pending_subscriber();
-		return get(this.#effect_pending);
+		return get$1(this.#effect_pending);
 	}
 	/** @param {unknown} error */
 	error(error) {
@@ -1735,7 +1752,7 @@ function proxy(value) {
 				sources.set(prop, s);
 			}
 			if (s !== void 0) {
-				var v = get(s);
+				var v = get$1(s);
 				return v === UNINITIALIZED ? void 0 : v;
 			}
 			return Reflect.get(target, prop, receiver);
@@ -1744,7 +1761,7 @@ function proxy(value) {
 			var descriptor = Reflect.getOwnPropertyDescriptor(target, prop);
 			if (descriptor && "value" in descriptor) {
 				var s = sources.get(prop);
-				if (s) descriptor.value = get(s);
+				if (s) descriptor.value = get$1(s);
 			} else if (descriptor === void 0) {
 				var source = sources.get(prop);
 				var value = source?.v;
@@ -1768,7 +1785,7 @@ function proxy(value) {
 					});
 					sources.set(prop, s);
 				}
-				if (get(s) === UNINITIALIZED) return false;
+				if (get$1(s) === UNINITIALIZED) return false;
 			}
 			return has;
 		},
@@ -1807,7 +1824,7 @@ function proxy(value) {
 			return true;
 		},
 		ownKeys(target) {
-			get(version);
+			get$1(version);
 			var own_keys = Reflect.ownKeys(target).filter((key) => {
 				var source = sources.get(key);
 				return source === void 0 || source.v !== UNINITIALIZED;
@@ -2432,7 +2449,7 @@ function update_effect(effect) {
 * @param {Value<V>} signal
 * @returns {V}
 */
-function get(signal) {
+function get$1(signal) {
 	var is_derived = (signal.f & 2) !== 0;
 	captured_signals?.add(signal);
 	if (active_reaction !== null && !untracking) {
@@ -2529,6 +2546,25 @@ function untrack(fn) {
 	}
 }
 //#endregion
+//#region node_modules/svelte/src/store/utils.js
+/** @import { Readable } from './public' */
+/**
+* @template T
+* @param {Readable<T> | null | undefined} store
+* @param {(value: T) => void} run
+* @param {(value: T) => void} [invalidate]
+* @returns {() => void}
+*/
+function subscribe_to_store(store, run, invalidate) {
+	if (store == null) {
+		run(void 0);
+		if (invalidate) invalidate(void 0);
+		return noop;
+	}
+	const unsub = untrack(() => store.subscribe(run, invalidate));
+	return unsub.unsubscribe ? () => unsub.unsubscribe() : unsub;
+}
+//#endregion
 //#region node_modules/svelte/src/store/shared/index.js
 /** @import { Readable, StartStopNotifier, Subscriber, Unsubscriber, Updater, Writable } from '../public.js' */
 /** @import { Stores, StoresValues, SubscribeInvalidateTuple } from '../private.js' */
@@ -2611,6 +2647,85 @@ function writable(value, start = noop) {
 		update,
 		subscribe
 	};
+}
+/**
+* Derived value store by synchronizing one or more readable stores and
+* applying an aggregation function over its input values.
+*
+* @template {Stores} S
+* @template T
+* @overload
+* @param {S} stores
+* @param {(values: StoresValues<S>, set: (value: T) => void, update: (fn: Updater<T>) => void) => Unsubscriber | void} fn
+* @param {T} [initial_value]
+* @returns {Readable<T>}
+*/
+/**
+* Derived value store by synchronizing one or more readable stores and
+* applying an aggregation function over its input values.
+*
+* @template {Stores} S
+* @template T
+* @overload
+* @param {S} stores
+* @param {(values: StoresValues<S>) => T} fn
+* @param {T} [initial_value]
+* @returns {Readable<T>}
+*/
+/**
+* @template {Stores} S
+* @template T
+* @param {S} stores
+* @param {Function} fn
+* @param {T} [initial_value]
+* @returns {Readable<T>}
+*/
+function derived$1(stores, fn, initial_value) {
+	const single = !Array.isArray(stores);
+	/** @type {Array<Readable<any>>} */
+	const stores_array = single ? [stores] : stores;
+	if (!stores_array.every(Boolean)) throw new Error("derived() expects stores as input, got a falsy value");
+	const auto = fn.length < 2;
+	return readable(initial_value, (set, update) => {
+		let started = false;
+		/** @type {T[]} */
+		const values = [];
+		let pending = 0;
+		let cleanup = noop;
+		const sync = () => {
+			if (pending) return;
+			cleanup();
+			const result = fn(single ? values[0] : values, set, update);
+			if (auto) set(result);
+			else cleanup = typeof result === "function" ? result : noop;
+		};
+		const unsubscribers = stores_array.map((store, i) => subscribe_to_store(store, (value) => {
+			values[i] = value;
+			pending &= ~(1 << i);
+			if (started) sync();
+		}, () => {
+			pending |= 1 << i;
+		}));
+		started = true;
+		sync();
+		return function stop() {
+			run_all(unsubscribers);
+			cleanup();
+			started = false;
+		};
+	});
+}
+/**
+* Get the current value from a store by subscribing and immediately unsubscribing.
+*
+* @template T
+* @param {Readable<T>} store
+* @returns {T}
+*/
+function get(store) {
+	let value;
+	subscribe_to_store(store, (_) => value = _)();
+	return value;
 }
 //#endregion
 //#region node_modules/svelte/src/utils.js
@@ -3864,6 +3979,100 @@ function attributes(attrs, css_hash, classes, styles, flags = 0) {
 	return attr_str;
 }
 /**
+* @param {unknown} value
+* @returns {string}
+*/
+function stringify(value) {
+	return typeof value === "string" ? value : value == null ? "" : value + "";
+}
+/**
+* @param {any} value
+* @param {Record<string,any>|[Record<string,any>,Record<string,any>]} [directives]
+*/
+function attr_style(value, directives) {
+	var result = to_style(value, directives);
+	return result ? ` style="${escape_html(result, true)}"` : "";
+}
+/**
+* @template V
+* @param {Record<string, [any, any, any]>} store_values
+* @param {string} store_name
+* @param {Store<V> | null | undefined} store
+* @returns {V}
+*/
+function store_get(store_values, store_name, store) {
+	if (store_name in store_values && store_values[store_name][0] === store) return store_values[store_name][2];
+	store_values[store_name]?.[1]();
+	store_values[store_name] = [
+		store,
+		null,
+		void 0
+	];
+	const unsub = subscribe_to_store(
+		store,
+		/** @param {any} v */
+		(v) => store_values[store_name][2] = v
+	);
+	store_values[store_name][1] = unsub;
+	return store_values[store_name][2];
+}
+/** @param {Record<string, [any, any, any]>} store_values */
+function unsubscribe_stores(store_values) {
+	for (const store_name of Object.keys(store_values)) store_values[store_name][1]();
+}
+/**
+* @param {Renderer} renderer
+* @param {Record<string, any>} $$props
+* @param {string} name
+* @param {Record<string, unknown>} slot_props
+* @param {null | (() => void)} fallback_fn
+* @returns {void}
+*/
+function slot(renderer, $$props, name, slot_props, fallback_fn) {
+	var slot_fn = $$props.$$slots?.[name];
+	if (slot_fn === true) slot_fn = $$props[name === "default" ? "children" : name];
+	if (slot_fn !== void 0) slot_fn(renderer, slot_props);
+	else fallback_fn?.();
+}
+/**
+* @param {Record<string, unknown>} props
+* @param {string[]} rest
+* @returns {Record<string, unknown>}
+*/
+function rest_props(props, rest) {
+	/** @type {Record<string, unknown>} */
+	const rest_props = {};
+	let key;
+	for (key of Object.keys(props)) if (!rest.includes(key)) rest_props[key] = props[key];
+	return rest_props;
+}
+/**
+* @param {Record<string, unknown>} props
+* @returns {Record<string, unknown>}
+*/
+function sanitize_props(props) {
+	const { children, $$slots, ...sanitized } = props;
+	return sanitized;
+}
+/**
+* Legacy mode: If the prop has a fallback and is bound in the
+* parent component, propagate the fallback value upwards.
+* @param {Record<string, unknown>} props_parent
+* @param {Record<string, unknown>} props_now
+*/
+function bind_props(props_parent, props_now) {
+	for (const key of Object.keys(props_now)) {
+		const initial_value = props_parent[key];
+		const value = props_now[key];
+		if (initial_value === void 0 && value !== void 0 && Object.getOwnPropertyDescriptor(props_parent, key)?.set) props_parent[key] = value;
+	}
+}
+/** @param {any} array_like_or_iterator */
+function ensure_array_like(array_like_or_iterator) {
+	if (array_like_or_iterator) return array_like_or_iterator.length !== void 0 ? array_like_or_iterator : Array.from(array_like_or_iterator);
+	return [];
+}
+/**
 * @template V
 * @param {() => V} get_value
 */
@@ -3890,4 +4099,4 @@ function derived(fn) {
 	};
 }
 //#endregion
-export { define_property as $, get_next_sibling as A, hydrate_node as B, get as C, clear_text_content as D, component_root as E, flushSync as F, lifecycle_double_unmount as G, set_hydrate_node as H, component_context as I, hydration_failed as J, state_proxy_unmount as K, pop$1 as L, mutable_source as M, set as N, create_text as O, boundary as P, array_from as Q, push$1 as R, active_reaction as S, set_active_reaction as T, set_hydrating as U, hydrating as V, hydration_mismatch as W, LEGACY_PROPS as X, experimental_async_required as Y, STATE_SYMBOL as Z, escape_html as _, get_render_context as a, writable as b, getContext as c, ssr_context as d, noop as et, hydratable_clobbering as f, attr as g, getAbortSignal as h, get_user_code_location as i, init_operations as j, get_first_child as k, hasContext as l, lifecycle_function_unavailable as m, head as n, createContext as o, hydratable_serialization_failed as p, HYDRATION_ERROR as q, render as r, getAllContexts as s, derived as t, run as tt, setContext as u, is_passive_event as v, set_active_effect as w, active_effect as x, readable as y, async_mode_flag as z };
+export { set_hydrate_node as $, readable as A, get_first_child as B, lifecycle_function_unavailable as C, is_passive_event as D, escape_html as E, set_active_effect as F, boundary as G, init_operations as H, set_active_reaction as I, pop$1 as J, flushSync as K, component_root as L, active_effect as M, active_reaction as N, derived$1 as O, get$1 as P, hydrating as Q, clear_text_content as R, hydratable_serialization_failed as S, attr as T, mutable_source as U, get_next_sibling as V, set as W, async_mode_flag as X, push$1 as Y, hydrate_node as Z, getContext as _, head as a, hydration_failed as at, ssr_context as b, sanitize_props as c, LEGACY_PROPS as ct, stringify as d, define_property as dt, set_hydrating as et, unsubscribe_stores as f, fallback as ft, getAllContexts as g, createContext as h, ensure_array_like as i, HYDRATION_ERROR as it, writable as j, get as k, slot as l, STATE_SYMBOL as lt, get_render_context as m, run as mt, bind_props as n, lifecycle_double_unmount as nt, render as o, experimental_async_required as ot, get_user_code_location as p, noop as pt, component_context as q, derived as r, state_proxy_unmount as rt, rest_props as s, invalid_default_snippet as st, attr_style as t, hydration_mismatch as tt, store_get as u, array_from as ut, hasContext as v, getAbortSignal as w, hydratable_clobbering as x, setContext as y, create_text as z };

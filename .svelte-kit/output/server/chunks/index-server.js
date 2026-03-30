@@ -1,4 +1,5 @@
-import { Y as experimental_async_required, a as get_render_context, c as getContext, d as ssr_context, et as noop, h as getAbortSignal, l as hasContext, m as lifecycle_function_unavailable, o as createContext, p as hydratable_serialization_failed, s as getAllContexts, tt as run, u as setContext, z as async_mode_flag } from "./server.js";
+import { C as lifecycle_function_unavailable, S as hydratable_serialization_failed, X as async_mode_flag, _ as getContext, b as ssr_context, g as getAllContexts, h as createContext, m as get_render_context, mt as run, ot as experimental_async_required, pt as noop, v as hasContext, w as getAbortSignal, y as setContext } from "./server.js";
+import { createRequire } from "node:module";
 import * as devalue from "devalue";
 //#region \0rolldown/runtime.js
 var __defProp = Object.defineProperty;
@@ -11,6 +12,7 @@ var __exportAll = (all, no_symbols) => {
 	if (!no_symbols) __defProp(target, Symbol.toStringTag, { value: "Module" });
 	return target;
 };
+var __require = /* @__PURE__ */ createRequire(import.meta.url);
 //#endregion
 //#region node_modules/svelte/src/internal/server/hydratable.js
 /** @import { HydratableLookupEntry } from '#server' */
@@ -142,4 +144,4 @@ function fork() {
 async function tick() {}
 async function settled() {}
 //#endregion
-export { onDestroy as n, tick as r, index_server_exports as t };
+export { __require as i, onDestroy as n, tick as r, index_server_exports as t };

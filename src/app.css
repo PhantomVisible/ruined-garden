@@ -127,10 +127,7 @@ body {
   background-size: 3px 3px;
 }
 
-.story-sentence {
-  opacity: 0;
-  transform: translateY(22px);
-}
+/* Removed .story-sentence opacity trigger to reveal texts 100% immediately */
 
 .practical-word {
   color: #6d6547;
@@ -164,10 +161,15 @@ body {
   right: 1.5rem;
   top: -45px;
   z-index: 45;
-  opacity: 0;
-  pointer-events: none;
+  opacity: 1;
+  pointer-events: auto;
   mix-blend-mode: multiply;
 }
+
+
+
+
+
 
 /* Typography */
 h1, h2, h3, h4, h5, h6 {
