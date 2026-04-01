@@ -3,7 +3,8 @@
   import gsap from "gsap";
   import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
   import GrowingIvy from "$lib/components/GrowingIvy.svelte";
-  import ZelligeTile from "$lib/components/ZelligeTile.svelte";
+
+  import BabBoujloud3D from "$lib/components/ui/BabBoujloud3D.svelte";
   import Hero from "$lib/components/Hero.svelte";
   import CrumbleCard from "$lib/components/CrumbleCard.svelte";
 
@@ -16,6 +17,7 @@
 
   let rootEl;
   let catEgg;
+  let gatewayText;
   let ctx;
 
   onMount(() => {
@@ -23,21 +25,22 @@
       const storyBlocks = rootEl.querySelectorAll("[data-story-block]");
       const highlightWords = rootEl.querySelectorAll(".practical-word");
 
-      // Scroll text animation removed, texts are now 100% visible beneath the crumbling blocks.
-
-      highlightWords.forEach((word) => {
-        gsap.to(word, {
-          color: "#C0B283",
-          textShadow: "0 0 18px rgba(192, 178, 131, 0.55)",
-          ease: "power1.inOut",
+      // Chapter II: Gateway Staggered Reveal
+      if (gatewayText) {
+        gsap.from(gatewayText.querySelectorAll(".story-sentence"), {
+          opacity: 0,
+          y: 20,
+          stagger: 0.2,
+          duration: 0.8,
+          ease: "power2.out",
           scrollTrigger: {
-            trigger: word,
-            start: "top 86%",
-            end: "bottom 58%",
-            scrub: 0.45,
+            trigger: gatewayText,
+            start: "top 75%",
+            toggleActions: "play none none reverse",
           },
         });
-      });
+      }
+
 
       gsap.fromTo(
         catEgg,
@@ -144,18 +147,22 @@
     </div>
   </section>
 
-  <!-- Chapter II: The Alchemist’s Table -->
+  <!-- Chapter II: The Gateway -->
   <section
-    id="history"
-    aria-labelledby="chapter-history"
-    class="relative py-20 min-h-[80vh] flex items-center justify-center"
+    id="gateway"
+    aria-labelledby="chapter-gateway"
+    class="relative py-20 min-h-screen flex flex-col items-center justify-center bg-stone-50"
   >
+    <div class="w-full max-w-5xl mx-auto px-4 mb-12">
+      <BabBoujloud3D />
+    </div>
+
     <div class="relative z-20 px-4 w-full">
       <div class="max-w-4xl mx-auto">
         <CrumbleCard>
-          <div class="chapter-card p-6 md:p-10">
-            <p class="chapter-eyebrow text-center">
-              Chapter II: The Alchemist's Table
+          <div class="chapter-card p-6 md:p-10" bind:this={gatewayText}>
+            <p class="chapter-eyebrow text-center" id="chapter-gateway">
+              Chapter II: The Gateway
             </p>
             <h2
               class="font-display text-4xl md:text-6xl text-terracotta-800 mb-6 text-center chapter-title"
@@ -180,16 +187,8 @@
               </p>
               <p class="story-sentence">
                 This is the home of the <span class="practical-word"
-                  >7-hour lamb</span
+                  >Seven-Hour Mechoui Lamb</span
                 >, a dish that cannot be rushed, only coaxed into perfection.
-              </p>
-              <p class="story-sentence">
-                Sip on chilled milk infused with date and orange blossom, or a
-                sharp cucumber-mint tonic.
-              </p>
-              <p class="story-sentence">
-                We serve no spirits here; the garden provides all the
-                intoxication you require.
               </p>
             </div>
           </div>
@@ -254,7 +253,9 @@
       </CrumbleCard>
     </div>
 
-    <ZelligeTile />
+    <div class="w-full max-w-lg mx-auto px-4 mt-12 opacity-40 mix-blend-overlay pointer-events-none">
+      <BabBoujloud3D />
+    </div>
   </section>
 
   <!-- Chapter IV: The Guided Return -->

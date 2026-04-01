@@ -19,6 +19,8 @@
   },
   "dependencies": {
     "@tailwindcss/postcss": "^4.2.2",
+    "@threlte/core": "^8.5.5",
+    "@threlte/extras": "^9.14.1",
     "autoprefixer": "^10.4.27",
     "clsx": "^2.1.1",
     "gsap": "^3.14.2",
@@ -26,6 +28,7 @@
     "postcss": "^8.5.8",
     "svelte-motion": "^0.12.2",
     "tailwind-merge": "^3.5.0",
-    "tailwindcss": "^4.2.2"
+    "tailwindcss": "^4.2.2",
+    "three": "^0.183.2"
   }
 }

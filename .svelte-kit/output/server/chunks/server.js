@@ -5,6 +5,7 @@ var is_array = Array.isArray;
 var index_of = Array.prototype.indexOf;
 var includes = Array.prototype.includes;
 var array_from = Array.from;
+var object_keys = Object.keys;
 var define_property = Object.defineProperty;
 var get_descriptor = Object.getOwnPropertyDescriptor;
 var object_prototype = Object.prototype;
@@ -145,6 +146,14 @@ function effect_update_depth_exceeded() {
 */
 function hydration_failed() {
 	throw new Error(`https://svelte.dev/e/hydration_failed`);
+}
+/**
+* The `%rune%` rune is only available inside `.svelte` and `.svelte.js/ts` files
+* @param {string} rune
+* @returns {never}
+*/
+function rune_outside_svelte(rune) {
+	throw new Error(`https://svelte.dev/e/rune_outside_svelte`);
 }
 /**
 * Property descriptors defined on `$state` objects must contain `value` and always be `enumerable`, `configurable` and `writable`.
@@ -1898,6 +1907,17 @@ function get_next_sibling(node) {
 function clear_text_content(node) {
 	node.textContent = "";
 }
+/**
+* @template {keyof HTMLElementTagNameMap | string} T
+* @param {T} tag
+* @param {string} [namespace]
+* @param {string} [is]
+* @returns {T extends keyof HTMLElementTagNameMap ? HTMLElementTagNameMap[T] : Element}
+*/
+function create_element(tag, namespace, is) {
+	let options = is ? { is } : void 0;
+	return document.createElementNS(namespace ?? "http://www.w3.org/1999/xhtml", tag, options);
+}
 //#endregion
 //#region node_modules/svelte/src/internal/client/dom/elements/bindings/shared.js
 /**
@@ -1995,6 +2015,18 @@ function effect_tracking() {
 */
 function create_user_effect(fn) {
 	return create_effect(4 | USER_EFFECT, fn);
+}
+/**
+* Internal representation of `$effect.root(...)`
+* @param {() => void | (() => void)} fn
+* @returns {() => void}
+*/
+function effect_root(fn) {
+	Batch.ensure();
+	const effect = create_effect(64 | EFFECT_PRESERVED, fn);
+	return () => {
+		destroy_effect(effect);
+	};
 }
 /**
 * An effect root whose children can transition out
@@ -3979,6 +4011,25 @@ function attributes(attrs, css_hash, classes, styles, flags = 0) {
 	return attr_str;
 }
 /**
+* @param {Record<string, unknown>[]} props
+* @returns {Record<string, unknown>}
+*/
+function spread_props(props) {
+	/** @type {Record<string, unknown>} */
+	const merged_props = {};
+	let key;
+	for (let i = 0; i < props.length; i++) {
+		const obj = props[i];
+		if (obj == null) continue;
+		for (key of Object.keys(obj)) {
+			const desc = Object.getOwnPropertyDescriptor(obj, key);
+			if (desc) Object.defineProperty(merged_props, key, desc);
+			else merged_props[key] = obj[key];
+		}
+	}
+	return merged_props;
+}
+/**
 * @param {unknown} value
 * @returns {string}
 */
@@ -4099,4 +4150,4 @@ function derived(fn) {
 	};
 }
 //#endregion
-export { set_hydrate_node as $, readable as A, get_first_child as B, lifecycle_function_unavailable as C, is_passive_event as D, escape_html as E, set_active_effect as F, boundary as G, init_operations as H, set_active_reaction as I, pop$1 as J, flushSync as K, component_root as L, active_effect as M, active_reaction as N, derived$1 as O, get$1 as P, hydrating as Q, clear_text_content as R, hydratable_serialization_failed as S, attr as T, mutable_source as U, get_next_sibling as V, set as W, async_mode_flag as X, push$1 as Y, hydrate_node as Z, getContext as _, head as a, hydration_failed as at, ssr_context as b, sanitize_props as c, LEGACY_PROPS as ct, stringify as d, define_property as dt, set_hydrating as et, unsubscribe_stores as f, fallback as ft, getAllContexts as g, createContext as h, ensure_array_like as i, HYDRATION_ERROR as it, writable as j, get as k, slot as l, STATE_SYMBOL as lt, get_render_context as m, run as mt, bind_props as n, lifecycle_double_unmount as nt, render as o, experimental_async_required as ot, get_user_code_location as p, noop as pt, component_context as q, derived as r, state_proxy_unmount as rt, rest_props as s, invalid_default_snippet as st, attr_style as t, hydration_mismatch as tt, store_get as u, array_from as ut, hasContext as v, getAbortSignal as w, hydratable_clobbering as x, setContext as y, create_text as z };
+export { queue_micro_task as $, get as A, render_effect as B, hydratable_serialization_failed as C, noop as Ct, escape_html as D, attr as E, get$1 as F, get_first_child as G, clear_text_content as H, set_active_effect as I, mutable_source as J, get_next_sibling as K, set_active_reaction as L, writable as M, active_effect as N, is_passive_event as O, active_reaction as P, flushSync as Q, component_root as R, hydratable_clobbering as S, fallback as St, getAbortSignal as T, run as Tt, create_element as U, without_reactive_context as V, create_text as W, boundary as X, set as Y, createSubscriber as Z, getAllContexts as _, LEGACY_PROPS as _t, head as a, hydrate_node as at, setContext as b, array_from as bt, sanitize_props as c, set_hydrating as ct, store_get as d, state_proxy_unmount as dt, component_context as et, stringify as f, HYDRATION_ERROR as ft, createContext as g, invalid_default_snippet as gt, get_render_context as h, experimental_async_required as ht, ensure_array_like as i, hydrate_next as it, readable as j, derived$1 as k, slot as l, hydration_mismatch as lt, get_user_code_location as m, rune_outside_svelte as mt, bind_props as n, push$1 as nt, render as o, hydrating as ot, unsubscribe_stores as p, hydration_failed as pt, init_operations as q, derived as r, async_mode_flag as rt, rest_props as s, set_hydrate_node as st, attr_style as t, pop$1 as tt, spread_props as u, lifecycle_double_unmount as ut, getContext as v, REACTION_RAN as vt, lifecycle_function_unavailable as w, object_keys as wt, ssr_context as x, define_property as xt, hasContext as y, STATE_SYMBOL as yt, effect_root as z };

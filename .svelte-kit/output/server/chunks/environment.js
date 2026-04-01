@@ -37,7 +37,7 @@ function set_public_env(environment) {
 }
 //#endregion
 //#region \0virtual:__sveltekit/environment
-var version = "1774869908612";
+var version = "1775073778193";
 var prerendering = false;
 function set_building() {}
 function set_prerendering() {

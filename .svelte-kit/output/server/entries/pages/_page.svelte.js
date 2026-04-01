@@ -1,8 +1,18 @@
-import { i as __require, n as onDestroy, r as tick } from "../../chunks/index-server.js";
-import { A as readable, E as escape_html, O as derived, T as attr, _ as getContext, a as head, c as sanitize_props, d as stringify, f as unsubscribe_stores, ft as fallback, i as ensure_array_like, j as writable, k as get, l as slot, n as bind_props, s as rest_props, st as invalid_default_snippet, t as attr_style, u as store_get, y as setContext } from "../../chunks/server.js";
-import "../../chunks/index-server2.js";
+import { c as __require, n as onDestroy, r as tick, s as on } from "../../chunks/index-server.js";
+import { A as get, D as escape_html, E as attr, M as writable, St as fallback, Z as createSubscriber, a as head, b as setContext, c as sanitize_props, d as store_get, f as stringify, gt as invalid_default_snippet, i as ensure_array_like, j as readable, k as derived, l as slot, n as bind_props, p as unsubscribe_stores, r as derived$1, s as rest_props, t as attr_style, v as getContext } from "../../chunks/server.js";
+import { t as fromStore } from "../../chunks/index-server2.js";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
+import * as THREE from "three";
+import { Box3, DefaultLoadingManager, Matrix4, Mesh, MeshBasicMaterial, Object3D, REVISION, Ray, ShaderChunk, Sphere, Vector2, Vector3 } from "three";
+import "mitt";
+import "camera-controls";
+import "three-viewport-gizmo";
+import "three/examples/jsm/controls/OrbitControls.js";
+import "three/examples/jsm/shaders/HorizontalBlurShader.js";
+import "three/examples/jsm/shaders/VerticalBlurShader.js";
+import { shaderIntersectFunction, shaderStructs } from "three-mesh-bvh";
+import "@threejs-kit/instanced-sprite-mesh";
 import sync, { cancelSync, flushSync, getFrameData } from "framesync";
 import { animate, anticipate, backIn, backInOut, backOut, bounceIn, bounceInOut, bounceOut, circIn, circInOut, circOut, clamp, cubicBezier, distance, easeIn, easeInOut, easeOut, inertia, interpolate, linear, mix, pipe, progress, velocityPerSecond } from "popmotion";
 import { __read, __rest, __spreadArray } from "tslib";
@@ -17,13 +27,605 @@ function GrowingIvy($$renderer, $$props) {
 	});
 }
 //#endregion
-//#region src/lib/components/ZelligeTile.svelte
-function ZelligeTile($$renderer, $$props) {
-	$$renderer.component(($$renderer) => {
-		if (typeof window !== "undefined") gsap.registerPlugin(ScrollTrigger);
-		onDestroy(() => {});
-		$$renderer.push(`<div class="w-full flex justify-center items-center py-24" style="perspective: 1000px"><div class="relative w-48 h-48 zellige-group transition-transform duration-100 ease-in-out scene-3d" style="will-change: transform; transform: rotateX(20deg) rotateY(20deg);"><div class="absolute inset-0 bg-terracotta-600 border-2 border-gold-500 flex items-center justify-center zellige-side rotate-0 gpu-layer" style="transform: translateZ(1rem); backface-visibility: hidden;"><div class="w-32 h-32 bg-forest-700 rotate-45 border border-gold-300 shadow-inner"><div class="w-full h-full border border-gold-400/50 scale-75"></div></div></div> <div class="absolute inset-0 bg-terracotta-800 border-2 border-gold-700 flex items-center justify-center zellige-side gpu-layer" style="transform: translateZ(-1rem) rotateX(180deg); backface-visibility: hidden;"><div class="w-32 h-32 bg-forest-900 rotate-45 border border-gold-600/50"></div></div></div></div>`);
+//#region node_modules/@threlte/core/dist/utilities/currentWritable.js
+/**
+* ### `currentWritable`
+*
+* A writable store that also has a `current` property that is updated synchronously.
+* For use in non-reactive contexts e.g. loops where unwrapping a store every frame is expensive.
+*
+* ```ts
+* const store = currentWritable(0)
+*
+* useTask(() => {
+* 	console.log(store.current) // 0
+* })
+*
+* @param value
+* @returns
+*/
+var currentWritable = (value) => {
+	const store = writable(value);
+	const extendedWritable = {
+		set: (value) => {
+			extendedWritable.current = value;
+			store.set(value);
+		},
+		subscribe: store.subscribe,
+		update: (fn) => {
+			const newValue = fn(extendedWritable.current);
+			extendedWritable.current = newValue;
+			store.set(newValue);
+		},
+		current: value
+	};
+	return extendedWritable;
+};
+//#endregion
+//#region node_modules/@threlte/core/dist/context/fragments/dom.svelte.js
+var useDOM = () => {
+	const context = getContext("threlte-dom-context");
+	if (!context) throw new Error("useDOM can only be used in a child component to <Canvas>.");
+	return context;
+};
+//#endregion
+//#region node_modules/@threlte/core/dist/context/fragments/scheduler.svelte.js
+var useScheduler = () => {
+	const context = getContext("threlte-scheduler-context");
+	if (!context) throw new Error("useScheduler can only be used in a child component to <Canvas>.");
+	return context;
+};
+globalThis.Date;
+globalThis.Set;
+globalThis.Map;
+globalThis.URL;
+globalThis.URLSearchParams;
+//#endregion
+//#region node_modules/@threlte/core/dist/context/fragments/camera.svelte.js
+var useCamera = () => {
+	const context = getContext("threlte-camera-context");
+	if (!context) throw new Error("useCamera can only be used in a child component to <Canvas>.");
+	return context;
+};
+//#endregion
+//#region node_modules/@threlte/core/dist/context/fragments/disposal.svelte.js
+var useDisposal = () => {
+	const context = getContext("threlte-disposal-context");
+	if (!context) throw new Error("useDisposal can only be used in a child component to <Canvas>.");
+	return context;
+};
+//#endregion
+//#region node_modules/@threlte/core/dist/context/fragments/parent.js
+var parentContextKey = Symbol("threlte-parent-context");
+/**
+* The parent context is used to access the parent object created by a `<T>`
+* component.
+*/
+var createParentContext = (parent) => {
+	const ctx = currentWritable(parent);
+	setContext(parentContextKey, ctx);
+	return ctx;
+};
+/**
+* The parent context is used to access the parent object created by a `<T>`
+* component.
+*
+* @example
+* ```svelte
+* <T.Mesh>
+*   <CustomComponent />
+* </T.Mesh>
+* ```
+*
+* The parent as retrieved inside the component `<CustomComponent>`
+* will be the mesh created by the `<T.Mesh>` component.
+*/
+var useParent = () => {
+	return getContext(parentContextKey);
+};
+//#endregion
+//#region node_modules/@threlte/core/dist/context/fragments/parentObject3D.js
+var parentObject3DContextKey = Symbol("threlte-parent-object3d-context");
+/**
+* The parentObject3D context is used to access the parent `THREE.Object3D`
+* created by a `<T>` component. The context is automatically merged with the
+* parentObject3D context of the parent component when the local context store
+* is `undefined`.
+*/
+var createParentObject3DContext = (object) => {
+	const parentObject3D = getContext(parentObject3DContextKey);
+	const object3D = writable(object);
+	setContext(parentObject3DContextKey, derived([object3D, parentObject3D], ([object3D, parentObject3D]) => {
+		return object3D ?? parentObject3D;
+	}));
+	return object3D;
+};
+/**
+* The parentObject3D context is used to access the parent `THREE.Object3D`
+* created by a `<T>` component.
+*
+* @example
+* ```svelte
+* <T.Mesh>
+*   <T.MeshStandardMaterial>
+*     <CustomComponent />
+*   </T.MeshStandardMaterial>
+* </T.Mesh>
+* ```
+*
+* The parentObject3D as retrieved inside the component `<CustomComponent>`
+* will be the mesh created by the `<T.Mesh>` component.
+*/
+var useParentObject3D = () => {
+	return getContext(parentObject3DContextKey);
+};
+//#endregion
+//#region node_modules/@threlte/core/dist/context/fragments/scene.js
+var useScene = () => {
+	const context = getContext("threlte-scene-context");
+	if (!context) throw new Error("useScene can only be used in a child component to <Canvas>.");
+	return context;
+};
+//#endregion
+//#region node_modules/svelte/src/reactivity/reactive-value.js
+/**
+* @template T
+*/
+var ReactiveValue = class {
+	#fn;
+	#subscribe;
+	/**
+	*
+	* @param {() => T} fn
+	* @param {(update: () => void) => void} onsubscribe
+	*/
+	constructor(fn, onsubscribe) {
+		this.#fn = fn;
+		this.#subscribe = createSubscriber(onsubscribe);
+	}
+	get current() {
+		this.#subscribe();
+		return this.#fn();
+	}
+};
+if (typeof HTMLElement === "function");
+new ReactiveValue(() => void 0, (update) => on(window, "scroll", update));
+new ReactiveValue(() => void 0, (update) => on(window, "scroll", update));
+new ReactiveValue(() => void 0, (update) => on(window, "resize", update));
+new ReactiveValue(() => void 0, (update) => on(window, "resize", update));
+new ReactiveValue(() => void 0, (update) => on(window, "resize", update));
+new ReactiveValue(() => void 0, (update) => on(window, "resize", update));
+new ReactiveValue(() => void 0, (update) => {
+	let value = window.screenLeft;
+	let frame = requestAnimationFrame(function check() {
+		frame = requestAnimationFrame(check);
+		if (value !== (value = window.screenLeft)) update();
 	});
+	return () => {
+		cancelAnimationFrame(frame);
+	};
+});
+new ReactiveValue(() => void 0, (update) => {
+	let value = window.screenTop;
+	let frame = requestAnimationFrame(function check() {
+		frame = requestAnimationFrame(check);
+		if (value !== (value = window.screenTop)) update();
+	});
+	return () => {
+		cancelAnimationFrame(frame);
+	};
+});
+new ReactiveValue(() => void 0, (update) => {
+	const unsub_online = on(window, "online", update);
+	const unsub_offline = on(window, "offline", update);
+	return () => {
+		unsub_online();
+		unsub_offline();
+	};
+});
+//#endregion
+//#region node_modules/@threlte/core/dist/context/compounds/useThrelte.js
+/**
+* ### `useThrelte`
+*
+* This hook provides access to the main context of a Threlte application.
+*
+* ```svelte
+* <script>
+*   import { useThrelte } from 'threlte'
+*   const { camera } = useThrelte()
+*
+*   // Access the camera
+*   console.log(camera.current) // => PerspectiveCamera { … }
+* <\/script>
+* ```
+*/
+var useThrelte = () => {
+	const schedulerCtx = useScheduler();
+	const rendererCtx = useRenderer();
+	const cameraCtx = useCamera();
+	const sceneCtx = useScene();
+	const domCtx = useDOM();
+	return {
+		advance: schedulerCtx.advance,
+		autoRender: schedulerCtx.autoRender,
+		autoRenderTask: rendererCtx.autoRenderTask,
+		camera: cameraCtx.camera,
+		colorManagementEnabled: rendererCtx.colorManagementEnabled,
+		colorSpace: rendererCtx.colorSpace,
+		dpr: rendererCtx.dpr,
+		invalidate: schedulerCtx.invalidate,
+		mainStage: schedulerCtx.mainStage,
+		renderer: rendererCtx.renderer,
+		renderMode: schedulerCtx.renderMode,
+		renderStage: schedulerCtx.renderStage,
+		scheduler: schedulerCtx.scheduler,
+		shadows: rendererCtx.shadows,
+		shouldRender: schedulerCtx.shouldRender,
+		dom: domCtx.dom,
+		canvas: domCtx.canvas,
+		size: domCtx.size,
+		toneMapping: rendererCtx.toneMapping,
+		get scene() {
+			return sceneCtx.scene;
+		},
+		set scene(scene) {
+			sceneCtx.scene = scene;
+		}
+	};
+};
+//#endregion
+//#region node_modules/@threlte/core/dist/context/fragments/renderer.svelte.js
+var useRenderer = () => {
+	const context = getContext("threlte-renderer-context");
+	if (!context) throw new Error("useRenderer can only be used in a child component to <Canvas>.");
+	return context;
+};
+//#endregion
+//#region node_modules/@threlte/core/dist/components/T/utils/useAttach.svelte.js
+var useAttach = (getRef, getAttach) => {
+	const { invalidate } = useThrelte();
+	derived$1(getRef);
+	derived$1(getAttach);
+	fromStore(useParent());
+	fromStore(useParentObject3D());
+	createParentContext();
+	createParentObject3DContext();
+};
+//#endregion
+//#region node_modules/@threlte/core/dist/components/T/utils/useDispose.svelte.js
+var contextName = Symbol("threlte-disposable-object-context");
+var useDispose = (object, dispose) => {
+	const { disposableObjectMounted, disposableObjectUnmounted, removeObjectFromDisposal } = useDisposal();
+	const parentDispose = getContext(contextName);
+	const mergedDispose = derived$1(() => {
+		const local = dispose();
+		if (local !== void 0) return local !== false;
+		if (parentDispose?.() === false) return false;
+		return true;
+	});
+	setContext(contextName, () => mergedDispose());
+};
+//#endregion
+//#region node_modules/@threlte/core/dist/components/T/utils/useIs.js
+var currentIs;
+var setIs = (is) => {
+	currentIs = is;
+};
+var useIs = () => {
+	const is = currentIs;
+	currentIs = void 0;
+	return is;
+};
+//#endregion
+//#region node_modules/@threlte/core/dist/plugins/types.js
+var pluginContextKey = "threlte-plugin-context";
+//#endregion
+//#region node_modules/@threlte/core/dist/components/T/utils/usePlugins.js
+var usePlugins = (args) => {
+	const plugins = getContext(pluginContextKey);
+	if (!plugins) return;
+	const pluginsProps = [];
+	const pluginsArray = Object.values(plugins);
+	if (pluginsArray.length > 0) {
+		const pluginArgs = args();
+		for (let i = 0; i < pluginsArray.length; i++) {
+			const plugin = pluginsArray[i];
+			const p = plugin(pluginArgs);
+			if (p && p.pluginProps) pluginsProps.push(...p.pluginProps);
+		}
+	}
+	return { pluginsProps };
+};
+//#endregion
+//#region node_modules/@threlte/core/dist/components/T/utils/useProps.svelte.js
+var useProps = (object, props, pluginProps) => {
+	const { invalidate } = useThrelte();
+};
+//#endregion
+//#region node_modules/@threlte/core/dist/components/T/utils/utils.js
+/**
+* Short cicruits if the input is not a function, then calls toString on Function with guaranteed safe behavior
+*/
+var isClass = (input) => {
+	return typeof input === "function" && Function.prototype.toString.call(input).startsWith("class ");
+};
+var determineRef = (is, args) => {
+	if (isClass(is)) if (Array.isArray(args)) return new is(...args);
+	else return new is();
+	return is;
+};
+//#endregion
+//#region node_modules/@threlte/core/dist/components/T/T.svelte
+function T$1($$renderer, $$props) {
+	$$renderer.component(($$renderer) => {
+		let { is = useIs(), args, attach, manual = false, makeDefault = false, dispose, ref = void 0, oncreate, children, $$slots, $$events, ...props } = $$props;
+		/**
+		* When "is" or "args" change, we need to create a new ref.
+		*/
+		const internalRef = derived$1(() => determineRef(is, args));
+		const plugins = usePlugins(() => ({
+			get ref() {
+				return internalRef();
+			},
+			get args() {
+				return args;
+			},
+			get attach() {
+				return attach;
+			},
+			get manual() {
+				return manual;
+			},
+			get makeDefault() {
+				return makeDefault;
+			},
+			get dispose() {
+				return dispose;
+			},
+			get props() {
+				return props;
+			}
+		}));
+		useProps(() => internalRef(), () => props, () => plugins?.pluginsProps);
+		useAttach(() => internalRef(), () => attach);
+		useDispose(() => internalRef(), () => dispose);
+		/**
+		* oncreate needs to be called after all other hooks
+		* so that props will have been set once ref is passed
+		* to this callback
+		*/
+		children?.($$renderer, { ref: internalRef() });
+		$$renderer.push(`<!---->`);
+		bind_props($$props, { ref });
+	});
+}
+//#endregion
+//#region node_modules/@threlte/core/dist/components/T/T.js
+var catalogue = {};
+new Proxy(T$1, { get(_target, is) {
+	if (typeof is !== "string") return Reflect.get(_target, is);
+	const module = catalogue[is] || THREE[is];
+	if (module === void 0) throw new Error(`No Three.js module found for ${is}. Did you forget to extend the catalogue?`);
+	setIs(module);
+	return T$1;
+} });
+//#endregion
+//#region node_modules/@threlte/core/dist/utilities/observe.svelte.js
+var signal = Symbol();
+var isStore = (dep) => {
+	return typeof dep?.subscribe === "function";
+};
+var runObserve = (dependencies, callback, pre) => {
+	const stores = dependencies().map((d) => {
+		if (isStore(d)) return fromStore(d);
+		return signal;
+	});
+	derived$1(() => dependencies().map((d, i) => {
+		if (stores[i] === signal) return d;
+		return stores[i].current;
+	}));
+	if (pre) {}
+};
+var observePost = (dependencies, callback) => {
+	return runObserve(dependencies, callback, false);
+};
+/**
+* ### `observe.pre`
+*
+* Observe multiple stores and reactive values and call a callback when they
+* change to trigger side effects. The callback can return a cleanup function
+* that will be called when the dependencies change again or when the effect
+* root (most likely a component) is destroyed. Under the hood, `observe.pre` uses
+* Svelte's `$effect` to track dependencies and trigger the callback. For a
+* version that uses `$effect`, use `observe`.
+*
+* ```ts
+* const count = writable(0)
+* let name = $state('John')
+*
+* observe.pre(() => [count, name], ([count, name]) => {
+*  console.log(count, name) // 0 John
+* })
+* ```
+*
+* The callback can return a cleanup function that will be called when the
+* dependencies change again or when the component is destroyed.
+*
+* ```ts
+* const count = writable(0)
+*
+* observe.pre(() => [count], ([count]) => {
+*  console.log(count) // 0
+*  return () => {
+*    console.log('cleanup')
+*  }
+* })
+* ```
+*
+* @param dependencies - A function that returns an array of dependencies.
+* @param callback - A function that will be called with the current values of
+* the dependencies. The callback can return a cleanup function that will be
+* called when the dependencies change again or when the component is destroyed.
+*/
+var observePre = (dependencies, callback) => {
+	return runObserve(dependencies, callback, true);
+};
+Object.assign(observePost, { pre: observePre });
+REVISION.replace("dev", "");
+//#endregion
+//#region node_modules/@threlte/extras/dist/lib/storeUtils.js
+var toCurrentReadable = (store) => {
+	return {
+		subscribe: store.subscribe,
+		get current() {
+			return store.current;
+		}
+	};
+};
+//#endregion
+//#region node_modules/@threlte/extras/dist/hooks/useProgress.js
+var previousTotalLoaded = 0;
+var finishedOnce = currentWritable(false);
+var activeStore = currentWritable(false);
+var itemStore = currentWritable(void 0);
+var loadedStore = currentWritable(0);
+var totalStore = currentWritable(0);
+var errorsStore = currentWritable([]);
+var progressStore = currentWritable(0);
+var { onStart, onLoad, onError } = DefaultLoadingManager;
+DefaultLoadingManager.onStart = (url, loaded, total) => {
+	onStart?.(url, loaded, total);
+	activeStore.set(true);
+	itemStore.set(url);
+	loadedStore.set(loaded);
+	totalStore.set(total);
+	const progress = (loaded - previousTotalLoaded) / (total - previousTotalLoaded);
+	progressStore.set(progress);
+	if (progress === 1) finishedOnce.set(true);
+};
+DefaultLoadingManager.onLoad = () => {
+	onLoad?.();
+	activeStore.set(false);
+};
+DefaultLoadingManager.onError = (url) => {
+	onError?.(url);
+	errorsStore.update((errors) => {
+		return [...errors, url];
+	});
+};
+DefaultLoadingManager.onProgress = (url, loaded, total) => {
+	if (loaded === total) previousTotalLoaded = total;
+	activeStore.set(true);
+	itemStore.set(url);
+	loadedStore.set(loaded);
+	totalStore.set(total);
+	const progress = (loaded - previousTotalLoaded) / (total - previousTotalLoaded) || 1;
+	progressStore.set(progress);
+	if (progress === 1) finishedOnce.set(true);
+};
+toCurrentReadable(activeStore), toCurrentReadable(itemStore), toCurrentReadable(loadedStore), toCurrentReadable(totalStore), toCurrentReadable(errorsStore), toCurrentReadable(progressStore), toCurrentReadable(finishedOnce);
+new Vector3();
+new Vector3();
+new Vector3();
+new Sphere();
+new Matrix4();
+new Ray();
+new Vector3();
+//#endregion
+//#region node_modules/@threlte/extras/dist/components/Decal/Decal.svelte
+new Vector3();
+new Matrix4();
+new Vector3();
+new Vector3();
+new Object3D();
+new Vector3();
+new Vector3();
+new Vector3();
+new Vector2();
+var epsilon = (value) => Math.abs(value) < 1e-10 ? 0 : value;
+var getCSSMatrix = (mat4, m, prepend = "") => {
+	const { elements: e } = mat4;
+	return `${prepend}matrix3d(
+    ${epsilon(m[0] * e[0])},${epsilon(m[1] * e[1])},${epsilon(m[2] * e[2])},${epsilon(m[3] * e[3])},
+    ${epsilon(m[4] * e[4])},${epsilon(m[5] * e[5])},${epsilon(m[6] * e[6])},${epsilon(m[7] * e[7])},
+    ${epsilon(m[8] * e[8])},${epsilon(m[9] * e[9])},${epsilon(m[10] * e[10])},${epsilon(m[11] * e[11])},
+    ${epsilon(m[12] * e[12])},${epsilon(m[13] * e[13])},${epsilon(m[14] * e[14])},${epsilon(m[15] * e[15])}
+  )`;
+};
+((multipliers) => {
+	return (matrix) => getCSSMatrix(matrix, multipliers);
+})([
+	1,
+	-1,
+	1,
+	1,
+	1,
+	-1,
+	1,
+	1,
+	1,
+	-1,
+	1,
+	1,
+	1,
+	-1,
+	1,
+	1
+]);
+((scaleMultipliers) => {
+	return (matrix, factor) => getCSSMatrix(matrix, scaleMultipliers(factor), "translate(-50%,-50%)");
+})((f) => [
+	1 / f,
+	1 / f,
+	1 / f,
+	1,
+	-1 / f,
+	-1 / f,
+	-1 / f,
+	-1,
+	1 / f,
+	1 / f,
+	1 / f,
+	1,
+	1,
+	1,
+	1,
+	1
+]);
+new Matrix4();
+new Matrix4();
+new Mesh();
+`${ShaderChunk.logdepthbuf_pars_vertex}${ShaderChunk.fog_pars_vertex}${ShaderChunk.logdepthbuf_vertex}${ShaderChunk.fog_vertex}`;
+`${ShaderChunk.tonemapping_fragment}${ShaderChunk.colorspace_fragment}`;
+`${ShaderChunk.tonemapping_fragment}${ShaderChunk.colorspace_fragment}`;
+`${shaderStructs}${shaderIntersectFunction}${ShaderChunk.tonemapping_fragment}${ShaderChunk.colorspace_fragment}`;
+new Box3();
+typeof window !== "undefined" && document.createElement("div");
+new MeshBasicMaterial();
+new Vector3();
+new Matrix4();
+new Ray();
+new Sphere();
+new Box3();
+new Vector3();
+new Vector3();
+//#endregion
+//#region src/lib/components/ui/BabBoujloud3D.svelte
+function BabBoujloud3D($$renderer) {
+	let $$settled = true;
+	let $$inner_renderer;
+	function $$render_inner($$renderer) {
+		$$renderer.push(`<div class="canvas-container group relative svelte-ly0u21">`);
+		$$renderer.push("<!--[-1-->");
+		$$renderer.push(`<!--]--> <div class="absolute inset-x-0 bottom-0 pointer-events-none flex items-end justify-center pb-8 opacity-0 group-hover:opacity-100 transition-opacity duration-500"><p class="text-[0.65rem] uppercase tracking-[0.4em] text-gold-400 font-sans backdrop-blur-sm bg-forest-900/40 px-4 py-2 rounded-full border border-gold-900/20 shadow-2xl">Drag to Explore the Gateway</p></div></div>`);
+	}
+	do {
+		$$settled = true;
+		$$inner_renderer = $$renderer.copy();
+		$$render_inner($$inner_renderer);
+	} while (!$$settled);
+	$$renderer.subsume($$inner_renderer);
 }
 //#endregion
 //#region node_modules/svelte-motion/src/components/AnimateSharedLayout/types.js
@@ -6336,7 +6938,7 @@ function CrumbleCard($$renderer, $$props) {
 				each_array[i];
 				$$renderer.push(`<div class="relative w-full h-full bg-cover"${attr_style(` background-image: url(${stringify(crumblingWallImage)}); background-size: ${stringify(cols * 100)}% ${stringify(rows * 100)}%; background-position: ${stringify(i % cols * (100 / (cols - 1)))}% ${stringify(Math.floor(i / cols) * (100 / (rows - 1)))}%; border: 0.5px solid rgba(0,0,0,0.1); `)}></div>`);
 			}
-			$$renderer.push(`<!--]--> <div class="absolute inset-0 bg-stone-900/60 mix-blend-multiply flex flex-col items-center justify-center border-2 border-stone-500/20 m-2"><span class="font-display text-gold-400 text-3xl mb-2 tracking-wide drop-shadow-lg">Discover</span> <span class="font-sans text-stone-300 uppercase tracking-[0.3em] text-[0.7rem] animate-pulse">Click to Reveal</span></div></div>`);
+			$$renderer.push(`<!--]--> <div class="absolute inset-0 bg-stone-900/60 mix-blend-multiply flex flex-col items-center justify-center border-2 border-stone-500/20 m-2 pointer-events-none"><span class="font-display text-gold-400 text-3xl mb-2 tracking-wide drop-shadow-lg">Discover</span> <span class="font-sans text-stone-300 uppercase tracking-[0.3em] text-[0.7rem] animate-pulse">Click to Reveal</span></div></div>`);
 		} else $$renderer.push("<!--[-1-->");
 		$$renderer.push(`<!--]--></div>`);
 		bind_props($$props, { hasCrumbled });
@@ -6361,30 +6963,45 @@ function _page($$renderer, $$props) {
 		$$renderer.push(`<!----> <section aria-labelledby="chapter-ruin" class="relative min-h-screen flex flex-col items-center justify-center text-center px-4 py-20 overflow-hidden chapter-shell"><img class="absolute inset-0 h-full w-full object-cover fixed-parallax gpu-layer"${attr("src", heroImage)} alt="" loading="eager" fetchpriority="high" decoding="async" sizes="100vw"/> <div class="absolute inset-0 bg-stone-100/80"></div> <div class="grain-overlay"></div> <div class="max-w-5xl mx-auto z-10 relative animate-fade-in animate-slide-up w-full px-4">`);
 		CrumbleCard($$renderer, {
 			children: ($$renderer) => {
-				$$renderer.push(`<div class="story-panel"><p class="chapter-eyebrow">Chapter I: The Sanctuary Found</p> <h1 id="chapter-ruin" class="font-display text-5xl md:text-7xl lg:text-8xl text-forest-800 mb-6 leading-tight chapter-title">A Secret Map to the Soul of Fes.</h1> <div class="luxury-divider mx-auto mb-12"></div> <div data-story-block="" class="font-sans text-xl text-stone-700 leading-relaxed max-w-3xl mx-auto drop-shadow-sm font-medium text-left md:text-center space-y-4"><p class="story-sentence">Five minutes from the chaos of Talaa Seghira, time begins to slow.</p> <p class="story-sentence">Follow the hand-painted signs through the labyrinth of the Medina until the stone gives way to a hidden gate.</p> <p class="story-sentence">Here, a 14th-century merchant’s palace has been reclaimed by the earth.</p> <p class="story-sentence">We are a ruin, yes, but a living one.</p> <p class="story-sentence">Whether you find us by the light of a log fire in the winter salon or under the wide-brimmed shade of a summer sun hat, the garden is always waiting.</p></div></div>`);
+				$$renderer.push(`<div class="story-panel"><p class="chapter-eyebrow">Chapter I: The Sanctuary Found</p> <h1 id="chapter-ruin" class="font-display text-5xl md:text-7xl lg:text-8xl text-forest-800 mb-6 leading-tight chapter-title">A Secret Map to the Soul of Fes.</h1> <div class="luxury-divider mx-auto mb-12"></div> <div data-story-block="" class="font-sans text-xl text-stone-700 leading-relaxed max-w-3xl mx-auto drop-shadow-sm font-medium text-left md:text-center space-y-4"><p class="story-sentence">Five minutes from the chaos of Talaa Seghira, time begins to slow.</p> <p class="story-sentence">Follow the hand-painted signs through the labyrinth of the Medina
+              until the stone gives way to a hidden gate.</p> <p class="story-sentence">Here, a 14th-century merchant’s palace has been reclaimed by the
+              earth.</p> <p class="story-sentence">We are a ruin, yes, but a living one.</p> <p class="story-sentence">Whether you find us by the light of a log fire in the winter salon
+              or under the wide-brimmed shade of a summer sun hat, the garden is
+              always waiting.</p></div></div>`);
 			},
 			$$slots: { default: true }
 		});
-		$$renderer.push(`<!----></div></section> <section id="history" aria-labelledby="chapter-history" class="relative py-20 min-h-[80vh] flex items-center justify-center"><div class="relative z-20 px-4 w-full"><div class="max-w-4xl mx-auto">`);
+		$$renderer.push(`<!----></div></section> <section id="gateway" aria-labelledby="chapter-gateway" class="relative py-20 min-h-screen flex flex-col items-center justify-center bg-stone-50"><div class="w-full max-w-5xl mx-auto px-4 mb-12">`);
+		BabBoujloud3D($$renderer, {});
+		$$renderer.push(`<!----></div> <div class="relative z-20 px-4 w-full"><div class="max-w-4xl mx-auto">`);
 		CrumbleCard($$renderer, {
 			children: ($$renderer) => {
-				$$renderer.push(`<div class="chapter-card p-6 md:p-10"><p class="chapter-eyebrow text-center">Chapter II: The Alchemist's Table</p> <h2 class="font-display text-4xl md:text-6xl text-terracotta-800 mb-6 text-center chapter-title">Of Fire and Slow Time.</h2> <div class="luxury-divider mx-auto mb-8"></div> <div data-story-block="" class="font-sans text-stone-700 text-lg md:text-xl leading-relaxed space-y-4"><p class="story-sentence">Our kitchen breathes with the seasons.</p> <p class="story-sentence">At midday, we serve the vibrant pulse of the street, tapas and pastries dusted with sugar and history.</p> <p class="story-sentence">But as the shadows lengthen across the Zellige, the real magic begins.</p> <p class="story-sentence">This is the home of the <span class="practical-word">7-hour lamb</span>, a dish that cannot be rushed, only coaxed into perfection.</p> <p class="story-sentence">Sip on chilled milk infused with date and orange blossom, or a sharp cucumber-mint tonic.</p> <p class="story-sentence">We serve no spirits here; the garden provides all the intoxication you require.</p></div></div>`);
+				$$renderer.push(`<div class="chapter-card p-6 md:p-10"><p class="chapter-eyebrow text-center" id="chapter-gateway">Chapter II: The Gateway</p> <h2 class="font-display text-4xl md:text-6xl text-terracotta-800 mb-6 text-center chapter-title">Of Fire and Slow Time.</h2> <div class="luxury-divider mx-auto mb-8"></div> <div data-story-block="" class="font-sans text-stone-700 text-lg md:text-xl leading-relaxed space-y-4"><p class="story-sentence">Our kitchen breathes with the seasons.</p> <p class="story-sentence">At midday, we serve the vibrant pulse of the street, tapas and
+                pastries dusted with sugar and history.</p> <p class="story-sentence">But as the shadows lengthen across the Zellige, the real magic
+                begins.</p> <p class="story-sentence">This is the home of the <span class="practical-word">Seven-Hour Mechoui Lamb</span>, a dish that cannot be rushed, only coaxed into perfection.</p></div></div>`);
 			},
 			$$slots: { default: true }
 		});
 		$$renderer.push(`<!----></div></div></section> <section id="guardians" aria-labelledby="chapter-guardians" class="relative min-h-screen bg-stone-100 py-32 flex flex-col items-center justify-center chapter-shell"><div class="max-w-4xl mx-auto px-4 w-full text-center z-10 mb-12">`);
 		CrumbleCard($$renderer, {
 			children: ($$renderer) => {
-				$$renderer.push(`<div class="story-panel relative"><div class="cat-easter-egg" aria-hidden="true"><img src="/assets/sleeping-cat.svg" alt="Sleeping Cat" width="84" height="84" class="opacity-90 mix-blend-multiply drop-shadow-sm"/></div> <p class="chapter-eyebrow mb-8">Chapter III: The Guardians of the Medina</p> <h2 id="chapter-guardians" class="font-display text-5xl md:text-7xl text-terracotta-800 mb-8 chapter-title">Shadows in the Garden.</h2> <div class="luxury-divider mx-auto mb-8"></div> <div data-story-block="" class="font-sans text-stone-700 text-lg md:text-xl leading-relaxed max-w-3xl mx-auto space-y-4"><p class="story-sentence">You may see them, the silent, amber-eyed watchers of the Medina.</p> <p class="story-sentence">The stray cats of Fes are our ancient pest-control and our companions.</p> <p class="story-sentence">While we feed them at the gates and keep their water bowls full, we ask that you let them remain wild within our walls.</p> <p class="story-sentence">Behind the scenes, our human family works with the same quiet grace.</p> <p class="story-sentence">At The Ruined Garden, every gratuity goes directly to the hands that prepared your tea and the hearts that tend the hearth.</p></div></div>`);
+				$$renderer.push(`<div class="story-panel relative"><div class="cat-easter-egg" aria-hidden="true"><img src="/assets/sleeping-cat.svg" alt="Sleeping Cat" width="124" height="124" class="opacity-90 mix-blend-multiply drop-shadow-sm"/></div> <p class="chapter-eyebrow mb-8">Chapter III: The Guardians of the Medina</p> <h2 id="chapter-guardians" class="font-display text-5xl md:text-7xl text-terracotta-800 mb-8 chapter-title">Shadows in the Garden.</h2> <div class="luxury-divider mx-auto mb-8"></div> <div data-story-block="" class="font-sans text-stone-700 text-lg md:text-xl leading-relaxed max-w-3xl mx-auto space-y-4"><p class="story-sentence">You may see them, the silent, amber-eyed watchers of the Medina.</p> <p class="story-sentence">The stray cats of Fes are our ancient pest-control and our
+              companions.</p> <p class="story-sentence">While we feed them at the gates and keep their water bowls full,
+              we ask that you let them remain wild within our walls.</p> <p class="story-sentence">Behind the scenes, our human family works with the same quiet
+              grace.</p> <p class="story-sentence">At The Ruined Garden, every gratuity goes directly to the hands
+              that prepared your tea and the hearts that tend the hearth.</p></div></div>`);
 			},
 			$$slots: { default: true }
 		});
-		$$renderer.push(`<!----></div> `);
-		ZelligeTile($$renderer, {});
-		$$renderer.push(`<!----></section> <section id="feast" aria-labelledby="chapter-feast" class="relative min-h-[90vh] bg-forest-900 text-stone-100 flex flex-col justify-center items-center text-center px-4 py-32 shadow-[inset_0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden"><img class="absolute inset-0 h-full w-full object-cover fixed-parallax gpu-layer opacity-30"${attr("src", feastImage)} alt="" loading="lazy" decoding="async" sizes="100vw"/> <div class="grain-overlay"></div> <div class="relative z-10 w-full max-w-3xl mx-auto">`);
+		$$renderer.push(`<!----></div> <div class="w-full max-w-lg mx-auto px-4 mt-12 opacity-40 mix-blend-overlay pointer-events-none">`);
+		BabBoujloud3D($$renderer, {});
+		$$renderer.push(`<!----></div></section> <section id="feast" aria-labelledby="chapter-feast" class="relative min-h-[90vh] bg-forest-900 text-stone-100 flex flex-col justify-center items-center text-center px-4 py-32 shadow-[inset_0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden"><img class="absolute inset-0 h-full w-full object-cover fixed-parallax gpu-layer opacity-30"${attr("src", feastImage)} alt="" loading="lazy" decoding="async" sizes="100vw"/> <div class="grain-overlay"></div> <div class="relative z-10 w-full max-w-3xl mx-auto">`);
 		CrumbleCard($$renderer, {
 			children: ($$renderer) => {
-				$$renderer.push(`<div class="story-panel-dark"><p class="chapter-eyebrow text-gold-100/80 mb-7">Chapter IV: The Guided Return</p> <h2 id="chapter-feast" class="font-display text-5xl md:text-8xl text-gold-400 mb-8 glow-effect chapter-title">The Way Home.</h2> <div class="luxury-divider mx-auto mb-10"></div> <div data-story-block="" class="font-sans text-xl md:text-2xl text-stone-200 leading-relaxed mb-16 space-y-5"><p class="story-sentence">The Medina is a beautiful maze, but you need never feel lost.</p> <p class="story-sentence">For a few dirhams, our <span class="practical-word">Escort Service</span> will meet you at your riad and guide you through the starlit alleys to our door.</p> <p class="story-sentence">And when the feast is done, we make sure you return safely.</p> <p class="story-sentence">During the high seasons of light and bloom, our tables fill quickly. Secure your place in the story before the garden closes its gates for the night.</p></div> <button class="cta-luxury focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-300 focus-visible:ring-offset-2 focus-visible:ring-offset-forest-900">Reserve Your Table</button></div>`);
+				$$renderer.push(`<div class="story-panel-dark"><p class="chapter-eyebrow text-gold-100/80 mb-7">Chapter IV: The Guided Return</p> <h2 id="chapter-feast" class="font-display text-5xl md:text-8xl text-gold-400 mb-8 glow-effect chapter-title">The Way Home.</h2> <div class="luxury-divider mx-auto mb-10"></div> <div data-story-block="" class="font-sans text-xl md:text-2xl text-stone-200 leading-relaxed mb-16 space-y-5"><p class="story-sentence">The Medina is a beautiful maze, but you need never feel lost.</p> <p class="story-sentence">For a few dirhams, our <span class="practical-word">Escort Service</span> will meet you at your riad and guide you through the starlit alleys
+              to our door.</p> <p class="story-sentence">And when the feast is done, we make sure you return safely.</p> <p class="story-sentence">During the high seasons of light and bloom, our tables fill
+              quickly. Secure your place in the story before the garden closes
+              its gates for the night.</p></div> <button class="cta-luxury focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-300 focus-visible:ring-offset-2 focus-visible:ring-offset-forest-900">Reserve Your Table</button></div>`);
 			},
 			$$slots: { default: true }
 		});
