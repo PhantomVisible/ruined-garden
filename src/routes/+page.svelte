@@ -9,6 +9,7 @@
   import ReviewMarquee from "$lib/components/ui/ReviewMarquee.svelte";
   import Hero from "$lib/components/Hero.svelte";
   import CrumbleCard from "$lib/components/CrumbleCard.svelte";
+  import RoamingCat from "$lib/components/RoamingCat.svelte";
 
   let isMenuOpen = false;
   let isQuestionnaireOpen = false;
@@ -21,7 +22,6 @@
   }
 
   let rootEl;
-  let catEgg;
   let gatewayText;
   let ctx;
 
@@ -65,6 +65,7 @@
   bind:this={rootEl}
   class="site-shell bg-stone-50 text-stone-900 overflow-x-hidden selection:bg-gold-300 selection:text-forest-900"
 >
+  <RoamingCat />
   <Hero />
   <ReviewMarquee />
 
@@ -305,17 +306,6 @@
   <footer
     class="relative bg-[#0f1f18] text-stone-500 py-16 text-center font-sans tracking-wide border-t border-gold-900/40"
   >
-    <!-- The Sleeping Cat! -->
-    <div class="absolute right-8 md:right-16 -top-[3.2rem] opacity-70 pointer-events-none drop-shadow-lg">
-      <!-- Added `invert` class. If the graphic is black line-art, this makes it white so it's visible on the dark footer -->
-      <img
-        src="/assets/sleeping-cat.png"
-        alt="Sleeping Cat"
-        width="110"
-        height="110"
-        class="invert opacity-90"
-      />
-    </div>
     <p
       class="text-sm uppercase mb-4 text-gold-600/50 hover:text-gold-400 transition-colors cursor-pointer"
     >

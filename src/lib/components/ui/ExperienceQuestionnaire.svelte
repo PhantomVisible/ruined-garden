@@ -24,34 +24,39 @@
   let selectedOption = null;
   let isAnimating = false;
   let isCurating = true;
+  let isSubmitting = false;
+  let isSubmitted = false;
 
   let overlayEl;
   let containerElement;
   let ctx;
 
-  $: if (isOpen && typeof window !== 'undefined') {
-    document.body.style.overflow = 'hidden';
-    
-    // Reset state recursively so it is fresh on open
-    if (currentStep >= questions.length || !isCurating) {
+  let prevOpen = false;
+  $: if (isOpen !== prevOpen) {
+    prevOpen = isOpen;
+
+    if (isOpen && typeof window !== 'undefined') {
+      document.body.style.overflow = 'hidden';
+
+      // Reset state only when freshly opening
       currentStep = 0;
       answers = [];
       isCurating = true;
       selectedOption = null;
+      isSubmitting = false;
+      isSubmitted = false;
+
+      requestAnimationFrame(() => {
+        if (!overlayEl || !containerElement) return;
+        ctx = gsap.context(() => {
+          const tl = gsap.timeline();
+          tl.fromTo(overlayEl, { opacity: 0 }, { opacity: 1, duration: 0.4, ease: 'power2.out' })
+            .fromTo(containerElement, { opacity: 0, y: 30, scale: 0.95 }, { opacity: 1, y: 0, scale: 1, duration: 0.5, ease: 'power3.out' }, '-=0.2');
+        }, overlayEl);
+      });
+    } else if (!isOpen && typeof window !== 'undefined') {
+      if (document.body) document.body.style.overflow = '';
     }
-
-    requestAnimationFrame(() => {
-      if (!overlayEl || !containerElement) return;
-      ctx = gsap.context(() => {
-        const tl = gsap.timeline();
-        tl.fromTo(overlayEl, { opacity: 0 }, { opacity: 1, duration: 0.4, ease: 'power2.out' })
-          .fromTo(containerElement, { opacity: 0, y: 30, scale: 0.95 }, { opacity: 1, y: 0, scale: 1, duration: 0.5, ease: 'power3.out' }, '-=0.2');
-      }, overlayEl);
-    });
-  }
-
-  $: if (!isOpen && typeof window !== 'undefined') {
-    if (document.body) document.body.style.overflow = '';
   }
 
   function close() {
@@ -139,6 +144,38 @@
       });
     });
   };
+
+  const handleSubmit = async () => {
+    if (isSubmitting || isSubmitted) return;
+    
+    // Animate button push
+    isSubmitting = true;
+    
+    // Simulate API call
+    setTimeout(async () => {
+      ctx.add(() => {
+        gsap.to('.anim-form', {
+          y: -15,
+          opacity: 0,
+          duration: 0.4,
+          ease: 'power2.in',
+          onComplete: async () => {
+            isSubmitting = false;
+            isSubmitted = true;
+            await tick();
+            
+            gsap.fromTo('.anim-success',
+              { scale: 0.9, opacity: 0 },
+              { scale: 1, opacity: 1, duration: 0.5, ease: 'back.out(1.5)' }
+            );
+            
+            // Auto-close after reading success message
+            setTimeout(close, 4000);
+          }
+        });
+      });
+    }, 1200);
+  };
 </script>
 
 <svelte:window on:keydown={handleKeydown} />
@@ -205,7 +242,7 @@
             </div>
             <h2 class="font-serif text-2xl md:text-3xl text-gray-900 text-center">Curating your journey...</h2>
           </div>
-        {:else}
+        {:else if !isSubmitted}
           <div class="anim-form">
             <div class="text-center mb-8">
               <h2 class="font-serif text-3xl md:text-4xl text-gray-900 mb-4">Your Journey Awaits</h2>
@@ -215,16 +252,37 @@
             </div>
             
             <div class="space-y-4">
-              <input type="text" placeholder="Your Name" class="w-full px-6 py-4 rounded-lg border border-gray-300/80 font-sans text-gray-800 placeholder-gray-500 focus:outline-none focus:border-[#A65E46] focus:ring-1 focus:ring-[#A65E46] transition-all bg-transparent" />
-              <input type="email" placeholder="Your Email" class="w-full px-6 py-4 rounded-lg border border-gray-300/80 font-sans text-gray-800 placeholder-gray-500 focus:outline-none focus:border-[#A65E46] focus:ring-1 focus:ring-[#A65E46] transition-all bg-transparent" />
-              <button type="button" class="w-full bg-[#A65E46] text-white py-4 mt-2 rounded-lg font-sans tracking-widest uppercase text-[0.75rem] font-medium hover:bg-[#8F513C] transition-colors shadow-lg shadow-[#A65E46]/20">
-                Request Itinerary
+              <input type="text" placeholder="Your Name" class="w-full px-6 py-4 rounded-lg border border-gray-300/80 font-sans text-gray-800 placeholder-gray-500 focus:outline-none focus:border-[#A65E46] focus:ring-1 focus:ring-[#A65E46] transition-all bg-transparent disabled:opacity-50" disabled={isSubmitting} />
+              <input type="email" placeholder="Your Email" class="w-full px-6 py-4 rounded-lg border border-gray-300/80 font-sans text-gray-800 placeholder-gray-500 focus:outline-none focus:border-[#A65E46] focus:ring-1 focus:ring-[#A65E46] transition-all bg-transparent disabled:opacity-50" disabled={isSubmitting} />
+              <button 
+                type="button" 
+                on:click={handleSubmit}
+                disabled={isSubmitting}
+                class="relative overflow-hidden w-full bg-[#A65E46] text-white py-4 mt-2 rounded-lg font-sans tracking-widest uppercase text-[0.75rem] font-medium hover:bg-[#8F513C] transition-colors shadow-lg shadow-[#A65E46]/20 disabled:opacity-80 disabled:cursor-wait"
+              >
+                {#if isSubmitting}
+                  <span class="inline-block animate-pulse">Sending...</span>
+                {:else}
+                  Request Itinerary
+                {/if}
               </button>
               
               <p class="text-center font-sans text-xs text-gray-500 mt-4">
                 Prefer to write directly? <a href="mailto:concierge@theruinedgarden.com" class="text-[#A65E46] hover:underline transition-all">concierge@theruinedgarden.com</a>
               </p>
             </div>
+          </div>
+        {:else}
+          <div class="anim-success flex flex-col items-center justify-center py-10 text-center">
+            <div class="w-16 h-16 rounded-full bg-[#A65E46]/10 flex items-center justify-center mb-6 text-[#A65E46]">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" class="animate-[bounce_1s_ease-out]">
+                <path d="M20 6L9 17L4 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <h2 class="font-serif text-3xl md:text-4xl text-gray-900 mb-4">Request Sent</h2>
+            <p class="font-sans text-sm md:text-base text-gray-600 leading-relaxed max-w-sm mx-auto">
+              Our concierge will review your preferences and reach out shortly to finalize your bespoke experience.
+            </p>
           </div>
         {/if}
       {/if}
