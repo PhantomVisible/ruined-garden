@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount, onDestroy } from 'svelte';
+  import { browser } from '$app/environment';
   import { Motion, useTransform, useSpring, useViewportScroll, useMotionValue } from 'svelte-motion';
   import gsap from 'gsap';
   import ProductCard from './ProductCard.svelte';
@@ -31,7 +32,9 @@
   $: thirdRow  = [...thirdRowBase,  ...thirdRowBase,  ...thirdRowBase];
 
   // --- Scroll-driven base parallax (unchanged behaviour) ---
-  const { scrollYProgress } = useViewportScroll();
+  const { scrollYProgress } = browser 
+    ? useViewportScroll() 
+    : { scrollYProgress: useMotionValue(0) };
   const springConfig = { stiffness: 300, damping: 30, bounce: 100 };
 
   const scrollX        = useSpring(useTransform(scrollYProgress, [0, 1], [0,  1000]), springConfig);

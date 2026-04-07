@@ -5,7 +5,6 @@ var is_array = Array.isArray;
 var index_of = Array.prototype.indexOf;
 var includes = Array.prototype.includes;
 var array_from = Array.from;
-var object_keys = Object.keys;
 var define_property = Object.defineProperty;
 var get_descriptor = Object.getOwnPropertyDescriptor;
 var object_prototype = Object.prototype;
@@ -146,14 +145,6 @@ function effect_update_depth_exceeded() {
 */
 function hydration_failed() {
 	throw new Error(`https://svelte.dev/e/hydration_failed`);
-}
-/**
-* The `%rune%` rune is only available inside `.svelte` and `.svelte.js/ts` files
-* @param {string} rune
-* @returns {never}
-*/
-function rune_outside_svelte(rune) {
-	throw new Error(`https://svelte.dev/e/rune_outside_svelte`);
 }
 /**
 * Property descriptors defined on `$state` objects must contain `value` and always be `enumerable`, `configurable` and `writable`.
@@ -1907,17 +1898,6 @@ function get_next_sibling(node) {
 function clear_text_content(node) {
 	node.textContent = "";
 }
-/**
-* @template {keyof HTMLElementTagNameMap | string} T
-* @param {T} tag
-* @param {string} [namespace]
-* @param {string} [is]
-* @returns {T extends keyof HTMLElementTagNameMap ? HTMLElementTagNameMap[T] : Element}
-*/
-function create_element(tag, namespace, is) {
-	let options = is ? { is } : void 0;
-	return document.createElementNS(namespace ?? "http://www.w3.org/1999/xhtml", tag, options);
-}
 //#endregion
 //#region node_modules/svelte/src/internal/client/dom/elements/bindings/shared.js
 /**
@@ -2015,18 +1995,6 @@ function effect_tracking() {
 */
 function create_user_effect(fn) {
 	return create_effect(4 | USER_EFFECT, fn);
-}
-/**
-* Internal representation of `$effect.root(...)`
-* @param {() => void | (() => void)} fn
-* @returns {() => void}
-*/
-function effect_root(fn) {
-	Batch.ensure();
-	const effect = create_effect(64 | EFFECT_PRESERVED, fn);
-	return () => {
-		destroy_effect(effect);
-	};
 }
 /**
 * An effect root whose children can transition out
@@ -4011,30 +3979,20 @@ function attributes(attrs, css_hash, classes, styles, flags = 0) {
 	return attr_str;
 }
 /**
-* @param {Record<string, unknown>[]} props
-* @returns {Record<string, unknown>}
-*/
-function spread_props(props) {
-	/** @type {Record<string, unknown>} */
-	const merged_props = {};
-	let key;
-	for (let i = 0; i < props.length; i++) {
-		const obj = props[i];
-		if (obj == null) continue;
-		for (key of Object.keys(obj)) {
-			const desc = Object.getOwnPropertyDescriptor(obj, key);
-			if (desc) Object.defineProperty(merged_props, key, desc);
-			else merged_props[key] = obj[key];
-		}
-	}
-	return merged_props;
-}
-/**
 * @param {unknown} value
 * @returns {string}
 */
 function stringify(value) {
 	return typeof value === "string" ? value : value == null ? "" : value + "";
+}
+/**
+* @param {any} value
+* @param {string | undefined} [hash]
+* @param {Record<string, boolean>} [directives]
+*/
+function attr_class(value, hash, directives) {
+	var result = to_class(value, hash, directives);
+	return result ? ` class="${escape_html(result, true)}"` : "";
 }
 /**
 * @param {any} value
@@ -4150,4 +4108,4 @@ function derived(fn) {
 	};
 }
 //#endregion
-export { queue_micro_task as $, get as A, render_effect as B, hydratable_serialization_failed as C, noop as Ct, escape_html as D, attr as E, get$1 as F, get_first_child as G, clear_text_content as H, set_active_effect as I, mutable_source as J, get_next_sibling as K, set_active_reaction as L, writable as M, active_effect as N, is_passive_event as O, active_reaction as P, flushSync as Q, component_root as R, hydratable_clobbering as S, fallback as St, getAbortSignal as T, run as Tt, create_element as U, without_reactive_context as V, create_text as W, boundary as X, set as Y, createSubscriber as Z, getAllContexts as _, LEGACY_PROPS as _t, head as a, hydrate_node as at, setContext as b, array_from as bt, sanitize_props as c, set_hydrating as ct, store_get as d, state_proxy_unmount as dt, component_context as et, stringify as f, HYDRATION_ERROR as ft, createContext as g, invalid_default_snippet as gt, get_render_context as h, experimental_async_required as ht, ensure_array_like as i, hydrate_next as it, readable as j, derived$1 as k, slot as l, hydration_mismatch as lt, get_user_code_location as m, rune_outside_svelte as mt, bind_props as n, push$1 as nt, render as o, hydrating as ot, unsubscribe_stores as p, hydration_failed as pt, init_operations as q, derived as r, async_mode_flag as rt, rest_props as s, set_hydrate_node as st, attr_style as t, pop$1 as tt, spread_props as u, lifecycle_double_unmount as ut, getContext as v, REACTION_RAN as vt, lifecycle_function_unavailable as w, object_keys as wt, ssr_context as x, define_property as xt, hasContext as y, STATE_SYMBOL as yt, effect_root as z };
+export { hydrating as $, get as A, create_text as B, hydratable_serialization_failed as C, escape_html as D, attr as E, get$1 as F, set as G, get_next_sibling as H, set_active_effect as I, component_context as J, boundary as K, set_active_reaction as L, writable as M, active_effect as N, is_passive_event as O, active_reaction as P, hydrate_node as Q, component_root as R, hydratable_clobbering as S, getAbortSignal as T, init_operations as U, get_first_child as V, mutable_source as W, push$1 as X, pop$1 as Y, async_mode_flag as Z, getAllContexts as _, ensure_array_like as a, HYDRATION_ERROR as at, setContext as b, rest_props as c, invalid_default_snippet as ct, store_get as d, array_from as dt, set_hydrate_node as et, stringify as f, define_property as ft, createContext as g, get_render_context as h, run as ht, derived as i, state_proxy_unmount as it, readable as j, derived$1 as k, sanitize_props as l, LEGACY_PROPS as lt, get_user_code_location as m, noop as mt, attr_style as n, hydration_mismatch as nt, head as o, hydration_failed as ot, unsubscribe_stores as p, fallback as pt, flushSync as q, bind_props as r, lifecycle_double_unmount as rt, render as s, experimental_async_required as st, attr_class as t, set_hydrating as tt, slot as u, STATE_SYMBOL as ut, getContext as v, lifecycle_function_unavailable as w, ssr_context as x, hasContext as y, clear_text_content as z };

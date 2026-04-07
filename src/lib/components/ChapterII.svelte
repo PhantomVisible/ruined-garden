@@ -5,7 +5,9 @@
   import { ScrollTrigger } from 'gsap/ScrollTrigger';
   import MenuModal from './ui/MenuModal.svelte';
 
-  gsap.registerPlugin(ScrollTrigger);
+  if (typeof window !== 'undefined') {
+    gsap.registerPlugin(ScrollTrigger);
+  }
 
   let isMenuOpen = false;
 

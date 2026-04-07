@@ -2,7 +2,7 @@ import { t as index_server_exports } from "../../chunks/index-server.js";
 import "../../chunks/environment.js";
 import "../../chunks/shared.js";
 import "../../chunks/exports.js";
-import { Ct as noop, D as escape_html, M as writable, v as getContext } from "../../chunks/server.js";
+import { D as escape_html, M as writable, mt as noop, v as getContext } from "../../chunks/server.js";
 import "../../chunks/index-server2.js";
 import "../../chunks/internal.js";
 import "@sveltejs/kit/internal";
