@@ -44,6 +44,7 @@ declare module '$env/static/private' {
 	export const COLORTERM: string;
 	export const npm_config_cache: string;
 	export const NVM_INC: string;
+	export const HISTCONTROL: string;
 	export const XDG_MENU_PREFIX: string;
 	export const TERM_PROGRAM_VERSION: string;
 	export const QT_IM_MODULES: string;
@@ -105,9 +106,7 @@ declare module '$env/static/private' {
 	export const npm_lifecycle_event: string;
 	export const SHLVL: string;
 	export const NVM_CD_FLAGS: string;
-	export const PAGER: string;
 	export const QT_IM_MODULE: string;
-	export const ANTIGRAVITY_AGENT: string;
 	export const MANAGERPIDFDID: string;
 	export const npm_config_user_agent: string;
 	export const npm_execpath: string;
@@ -225,6 +224,7 @@ declare module '$env/dynamic/private' {
 		COLORTERM: string;
 		npm_config_cache: string;
 		NVM_INC: string;
+		HISTCONTROL: string;
 		XDG_MENU_PREFIX: string;
 		TERM_PROGRAM_VERSION: string;
 		QT_IM_MODULES: string;
@@ -286,9 +286,7 @@ declare module '$env/dynamic/private' {
 		npm_lifecycle_event: string;
 		SHLVL: string;
 		NVM_CD_FLAGS: string;
-		PAGER: string;
 		QT_IM_MODULE: string;
-		ANTIGRAVITY_AGENT: string;
 		MANAGERPIDFDID: string;
 		npm_config_user_agent: string;
 		npm_execpath: string;

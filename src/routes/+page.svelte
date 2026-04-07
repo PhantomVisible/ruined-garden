@@ -4,9 +4,14 @@
   import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
   import GrowingIvy from "$lib/components/GrowingIvy.svelte";
 
-  import BabBoujloud3D from "$lib/components/ui/BabBoujloud3D.svelte";
+  import ExperienceQuestionnaire from "$lib/components/ui/ExperienceQuestionnaire.svelte";
+  import MenuModal from "$lib/components/ui/MenuModal.svelte";
+  import ReviewMarquee from "$lib/components/ui/ReviewMarquee.svelte";
   import Hero from "$lib/components/Hero.svelte";
   import CrumbleCard from "$lib/components/CrumbleCard.svelte";
+
+  let isMenuOpen = false;
+  let isQuestionnaireOpen = false;
 
   const heroImage = "/assets/the-garden-early-evening.webp";
   const feastImage = "/assets/the-garden-at-night-photo.webp";
@@ -41,35 +46,6 @@
         });
       }
 
-
-      gsap.fromTo(
-        catEgg,
-        { opacity: 0, x: -14, scale: 0.86 },
-        {
-          opacity: 0.8,
-          x: 0,
-          scale: 1,
-          duration: 0.45,
-          ease: "power2.out",
-          scrollTrigger: {
-            trigger: "#guardians",
-            start: "top 63%",
-            toggleActions: "play none none reverse",
-            onEnter: () => {
-              gsap.to(catEgg, {
-                opacity: 0,
-                delay: 1.2,
-                duration: 0.55,
-                ease: "power1.inOut",
-              });
-            },
-            onEnterBack: () => {
-              gsap.to(catEgg, { opacity: 0.8, duration: 0.25 });
-              gsap.to(catEgg, { opacity: 0, delay: 1, duration: 0.45 });
-            },
-          },
-        },
-      );
     }, rootEl);
   });
 
@@ -90,6 +66,7 @@
   class="site-shell bg-stone-50 text-stone-900 overflow-x-hidden selection:bg-gold-300 selection:text-forest-900"
 >
   <Hero />
+  <ReviewMarquee />
 
   <!-- Chapter I: The Sanctuary Found -->
   <section
@@ -142,6 +119,15 @@
               always waiting.
             </p>
           </div>
+          <!-- CTA: Curate Journey -->
+          <div class="mt-12 pt-10 border-t border-stone-200/60 text-center">
+            <button
+              on:click={() => (isQuestionnaireOpen = true)}
+              class="inline-flex items-center justify-center px-8 py-4 border border-forest-800/60 text-forest-800 hover:bg-forest-800 hover:text-gold-300 transition-all duration-300 font-sans text-xs tracking-[0.22em] uppercase rounded-sm"
+            >
+              Curate Your Journey
+            </button>
+          </div>
         </div>
       </CrumbleCard>
     </div>
@@ -153,8 +139,8 @@
     aria-labelledby="chapter-gateway"
     class="relative py-20 min-h-screen flex flex-col items-center justify-center bg-stone-50"
   >
-    <div class="w-full max-w-5xl mx-auto px-4 mb-12">
-      <BabBoujloud3D />
+    <div class="w-full max-w-5xl mx-auto px-4 mb-12 text-center text-stone-500">
+      <!-- Empty space where inline questionnaire used to be -->
     </div>
 
     <div class="relative z-20 px-4 w-full">
@@ -191,6 +177,16 @@
                 >, a dish that cannot be rushed, only coaxed into perfection.
               </p>
             </div>
+
+            <!-- View the Menu CTA -->
+            <div class="mt-10 pt-8 border-t border-stone-200/60 text-center">
+              <button
+                on:click={() => (isMenuOpen = true)}
+                class="inline-flex items-center justify-center px-8 py-4 border border-[#C0B283]/70 text-[#8a7150] hover:bg-[#C0B283]/10 hover:border-[#C0B283] transition-all duration-300 font-sans text-xs tracking-[0.22em] uppercase rounded-sm"
+              >
+                View the Menu
+              </button>
+            </div>
           </div>
         </CrumbleCard>
       </div>
@@ -203,18 +199,9 @@
     aria-labelledby="chapter-guardians"
     class="relative min-h-screen bg-stone-100 py-32 flex flex-col items-center justify-center chapter-shell"
   >
-    <div class="max-w-4xl mx-auto px-4 w-full text-center z-10 mb-12">
+    <div class="max-w-4xl mx-auto px-4 w-full text-center z-10 mb-12 relative">
       <CrumbleCard>
         <div class="story-panel relative">
-          <div bind:this={catEgg} class="cat-easter-egg" aria-hidden="true">
-            <img
-              src="/assets/sleeping-cat.svg"
-              alt="Sleeping Cat"
-              width="124"
-              height="124"
-              class="opacity-90 mix-blend-multiply drop-shadow-sm"
-            />
-          </div>
           <p class="chapter-eyebrow mb-8">
             Chapter III: The Guardians of the Medina
           </p>
@@ -253,9 +240,6 @@
       </CrumbleCard>
     </div>
 
-    <div class="w-full max-w-lg mx-auto px-4 mt-12 opacity-40 mix-blend-overlay pointer-events-none">
-      <BabBoujloud3D />
-    </div>
   </section>
 
   <!-- Chapter IV: The Guided Return -->
@@ -319,8 +303,19 @@
   </section>
 
   <footer
-    class="bg-[#0f1f18] text-stone-500 py-16 text-center font-sans tracking-wide border-t border-gold-900/40"
+    class="relative bg-[#0f1f18] text-stone-500 py-16 text-center font-sans tracking-wide border-t border-gold-900/40"
   >
+    <!-- The Sleeping Cat! -->
+    <div class="absolute right-8 md:right-16 -top-[3.2rem] opacity-70 pointer-events-none drop-shadow-lg">
+      <!-- Added `invert` class. If the graphic is black line-art, this makes it white so it's visible on the dark footer -->
+      <img
+        src="/assets/sleeping-cat.png"
+        alt="Sleeping Cat"
+        width="110"
+        height="110"
+        class="invert opacity-90"
+      />
+    </div>
     <p
       class="text-sm uppercase mb-4 text-gold-600/50 hover:text-gold-400 transition-colors cursor-pointer"
     >
@@ -329,3 +324,6 @@
     <p>&copy; 2026 The Ruined Garden. All rights reserved.</p>
   </footer>
 </main>
+
+<MenuModal bind:isOpen={isMenuOpen} />
+<ExperienceQuestionnaire bind:isOpen={isQuestionnaireOpen} />

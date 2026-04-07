@@ -1,7 +1,9 @@
 <script>
-  import { onMount } from "svelte";
+  import { onMount, onDestroy } from "svelte";
   import gsap from "gsap";
+  import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
 
+  let mainContainer;
   let coverEl;
   let overlayEl;
   let flowerLeft;
@@ -12,6 +14,7 @@
   const rows = 8; // Number of brick rows
   const cols = 6; // Number of brick columns
   const crumblingWallImage = '/assets/crumbling-wall.webp';
+  let st; // ScrollTrigger instance
 
   const crumble = () => {
     if (hasCrumbled) return;
@@ -57,9 +60,24 @@
       0.3,
     );
   };
+
+  onMount(() => {
+    gsap.registerPlugin(ScrollTrigger);
+    
+    st = ScrollTrigger.create({
+      trigger: mainContainer,
+      start: "top 75%", // Triggers when the top of the card hits 75% down the viewport
+      onEnter: crumble,
+      once: true
+    });
+  });
+
+  onDestroy(() => {
+    if (st) st.kill();
+  });
 </script>
 
-<div class="relative block w-full outline-none">
+<div bind:this={mainContainer} class="relative block w-full outline-none">
   <!-- Emerging Flowers (Placeholders SVG) -->
   <div
     bind:this={flowerLeft}
@@ -121,13 +139,8 @@
   {#if !hasCrumbled}
     <div
       bind:this={coverEl}
-      class="absolute inset-x-0 inset-y-0 z-20 grid overflow-hidden shadow-2xl transition-transform duration-300 hover:scale-[1.01] cursor-pointer"
+      class="absolute inset-x-0 inset-y-0 z-20 grid overflow-hidden shadow-2xl transition-transform duration-300"
       style={`grid-template-columns: repeat(${cols}, 1fr); grid-template-rows: repeat(${rows}, 1fr);`}
-      on:click={crumble}
-      on:keydown={(e) => e.key === "Enter" && crumble()}
-      tabindex="0"
-      role="button"
-      aria-label="Click to Reveal"
     >
       {#each Array(rows * cols) as _, i}
         <div
@@ -144,16 +157,8 @@
 
       <div
         bind:this={overlayEl}
-        class="absolute inset-0 bg-stone-900/60 mix-blend-multiply flex flex-col items-center justify-center border-2 border-stone-500/20 m-2 pointer-events-none"
+        class="absolute inset-0 bg-stone-900/40 mix-blend-multiply flex flex-col items-center justify-center border-2 border-stone-500/20 m-2 pointer-events-none"
       >
-        <span
-          class="font-display text-gold-400 text-3xl mb-2 tracking-wide drop-shadow-lg"
-          >Discover</span
-        >
-        <span
-          class="font-sans text-stone-300 uppercase tracking-[0.3em] text-[0.7rem] animate-pulse"
-          >Click to Reveal</span
-        >
       </div>
     </div>
   {/if}

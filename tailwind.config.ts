@@ -62,6 +62,14 @@ export default {
         128: '32rem',
         144: '36rem',
       },
+      animation: {
+        marquee: 'marquee 40s linear infinite',
+      },
+      keyframes: {
+        marquee: {
+          to: { transform: 'translateX(-50%)' },
+        },
+      },
     },
   },
   plugins: [],

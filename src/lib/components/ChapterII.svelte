@@ -3,8 +3,11 @@
   import { initCrumblingWallReveal, initScrollReveal } from '../animations/gsapAnimations.js';
   import gsap from 'gsap';
   import { ScrollTrigger } from 'gsap/ScrollTrigger';
+  import MenuModal from './ui/MenuModal.svelte';
 
   gsap.registerPlugin(ScrollTrigger);
+
+  let isMenuOpen = false;
 
   let maskElement;
   let contentElement;
@@ -124,10 +127,22 @@
             </p>
           </div>
         </div>
+
+        <!-- CTA: View the Menu -->
+        <div class="mt-12 pt-10 border-t border-stone-700 text-center">
+          <button
+            on:click={() => (isMenuOpen = true)}
+            class="inline-flex items-center justify-center px-8 py-4 border border-[#C0B283]/60 text-[#C0B283] hover:bg-[#C0B283]/10 hover:border-[#C0B283] transition-all duration-300 font-sans text-xs md:text-sm tracking-[0.2em] uppercase rounded-sm"
+          >
+            View the Menu
+          </button>
+        </div>
       </div>
     </div>
   </div>
 </section>
+
+<MenuModal bind:isOpen={isMenuOpen} />
 
 <style>
   .crumbling-wall {
