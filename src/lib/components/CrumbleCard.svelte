@@ -1,7 +1,6 @@
 <script>
   import { onMount, onDestroy } from "svelte";
   import gsap from "gsap";
-  import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
 
   let mainContainer;
   let coverEl;
@@ -61,7 +60,8 @@
     );
   };
 
-  onMount(() => {
+  onMount(async () => {
+    const { ScrollTrigger } = await import('gsap/dist/ScrollTrigger');
     gsap.registerPlugin(ScrollTrigger);
     
     st = ScrollTrigger.create({

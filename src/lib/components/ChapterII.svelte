@@ -2,12 +2,9 @@
   import { onMount } from 'svelte';
   import { initCrumblingWallReveal, initScrollReveal } from '../animations/gsapAnimations.js';
   import gsap from 'gsap';
-  import { ScrollTrigger } from 'gsap/ScrollTrigger';
   import MenuModal from './ui/MenuModal.svelte';
 
-  if (typeof window !== 'undefined') {
-    gsap.registerPlugin(ScrollTrigger);
-  }
+
 
   let isMenuOpen = false;
 
@@ -15,7 +12,10 @@
   let contentElement;
   let chapterContent;
 
-  onMount(() => {
+  onMount(async () => {
+    const { ScrollTrigger } = await import('gsap/ScrollTrigger');
+    gsap.registerPlugin(ScrollTrigger);
+
     if (maskElement && contentElement) {
       initCrumblingWallReveal(maskElement, contentElement);
     }

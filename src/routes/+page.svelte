@@ -1,7 +1,6 @@
 <script>
   import { onMount, onDestroy } from "svelte";
   import gsap from "gsap";
-  import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
   import GrowingIvy from "$lib/components/GrowingIvy.svelte";
 
   import ExperienceQuestionnaire from "$lib/components/ui/ExperienceQuestionnaire.svelte";
@@ -17,15 +16,16 @@
   const heroImage = "/assets/the-garden-early-evening.webp";
   const feastImage = "/assets/the-garden-at-night-photo.webp";
 
-  if (typeof window !== "undefined") {
-    gsap.registerPlugin(ScrollTrigger);
-  }
+
 
   let rootEl;
   let gatewayText;
   let ctx;
 
-  onMount(() => {
+  onMount(async () => {
+    const { ScrollTrigger } = await import("gsap/dist/ScrollTrigger");
+    gsap.registerPlugin(ScrollTrigger);
+
     ctx = gsap.context(() => {
       const storyBlocks = rootEl.querySelectorAll("[data-story-block]");
       const highlightWords = rootEl.querySelectorAll(".practical-word");

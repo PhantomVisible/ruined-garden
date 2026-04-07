@@ -41,6 +41,7 @@ declare module '$env/static/private' {
 	export const ACSetupSvcPort: string;
 	export const ACSvcPort: string;
 	export const ALLUSERSPROFILE: string;
+	export const ANTIGRAVITY_AGENT: string;
 	export const ANTIGRAVITY_CLI_ALIAS: string;
 	export const APPDATA: string;
 	export const ChocolateyInstall: string;
@@ -90,6 +91,7 @@ declare module '$env/static/private' {
 	export const NVM_SYMLINK: string;
 	export const OneDrive: string;
 	export const OS: string;
+	export const PAGER: string;
 	export const Path: string;
 	export const PATHEXT: string;
 	export const PROCESSOR_ARCHITECTURE: string;
@@ -210,6 +212,7 @@ declare module '$env/dynamic/private' {
 		ACSetupSvcPort: string;
 		ACSvcPort: string;
 		ALLUSERSPROFILE: string;
+		ANTIGRAVITY_AGENT: string;
 		ANTIGRAVITY_CLI_ALIAS: string;
 		APPDATA: string;
 		ChocolateyInstall: string;
@@ -259,6 +262,7 @@ declare module '$env/dynamic/private' {
 		NVM_SYMLINK: string;
 		OneDrive: string;
 		OS: string;
+		PAGER: string;
 		Path: string;
 		PATHEXT: string;
 		PROCESSOR_ARCHITECTURE: string;

@@ -1,17 +1,17 @@
 <script>
   import { onMount, onDestroy } from 'svelte';
   import gsap from 'gsap';
-  import { ScrollTrigger } from 'gsap/dist/ScrollTrigger';
 
-  if (typeof window !== 'undefined') {
-    gsap.registerPlugin(ScrollTrigger);
-  }
+
 
   let ivyPath;
   let leafPaths = [];
   let ctx;
 
-  onMount(() => {
+  onMount(async () => {
+    const { ScrollTrigger } = await import('gsap/dist/ScrollTrigger');
+    gsap.registerPlugin(ScrollTrigger);
+
     ctx = gsap.context(() => {
       if (!ivyPath) return;
       const length = ivyPath.getTotalLength();

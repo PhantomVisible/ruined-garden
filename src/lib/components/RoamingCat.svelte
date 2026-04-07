@@ -1,7 +1,6 @@
 <script>
   import { onMount, onDestroy } from 'svelte';
   import gsap from 'gsap';
-  import { ScrollTrigger } from 'gsap/dist/ScrollTrigger';
 
   // Each entry describes one cat instance:
   // - trigger: a CSS selector for the section that "owns" this cat
@@ -20,8 +19,8 @@
   let cats = [];      // array of bound DOM elements
   let triggers = [];  // keep track of ScrollTrigger instances
 
-  onMount(() => {
-    if (typeof window === 'undefined') return;
+  onMount(async () => {
+    const { ScrollTrigger } = await import('gsap/dist/ScrollTrigger');
     gsap.registerPlugin(ScrollTrigger);
 
     placements.forEach((p, i) => {

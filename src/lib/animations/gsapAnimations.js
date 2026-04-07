@@ -1,8 +1,18 @@
 import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
-if (typeof window !== 'undefined') {
-  gsap.registerPlugin(ScrollTrigger);
+let _ScrollTrigger = null;
+
+/**
+ * Lazily load and register ScrollTrigger (SSR-safe).
+ * Only imports the module in the browser.
+ */
+async function getScrollTrigger() {
+  if (!_ScrollTrigger) {
+    const mod = await import('gsap/ScrollTrigger');
+    _ScrollTrigger = mod.ScrollTrigger;
+    gsap.registerPlugin(_ScrollTrigger);
+  }
+  return _ScrollTrigger;
 }
 
 /**
@@ -10,8 +20,9 @@ if (typeof window !== 'undefined') {
  * @param {SVGPathElement} pathElement - The SVG path element for the ivy
  * @param {number} duration - Animation duration in seconds
  */
-export function initGrowingIvy(pathElement, duration = 3) {
+export async function initGrowingIvy(pathElement, duration = 3) {
   if (!pathElement) return;
+  const ScrollTrigger = await getScrollTrigger();
 
   const pathLength = pathElement.getTotalLength();
 
@@ -81,7 +92,7 @@ export function createLeafSprout(pathElement) {
  * @param {HTMLElement} element - The element to animate
  * @param {Object} options - Animation options
  */
-export function initScrollReveal(element, options = {}) {
+export async function initScrollReveal(element, options = {}) {
   const {
     duration = 0.8,
     delay = 0,
@@ -90,6 +101,8 @@ export function initScrollReveal(element, options = {}) {
     start = 'top 80%',
     end = 'top 50%',
   } = options;
+
+  const ScrollTrigger = await getScrollTrigger();
 
   // Split text into words if needed
   const children = element.querySelectorAll('[data-reveal]');
@@ -129,7 +142,8 @@ export function initScrollReveal(element, options = {}) {
  * @param {HTMLElement} element - The element to animate
  * @param {number} speed - Parallax speed (0-1)
  */
-export function initParallax(element, speed = 0.5) {
+export async function initParallax(element, speed = 0.5) {
+  const ScrollTrigger = await getScrollTrigger();
   gsap.to(element, {
     y: () => window.innerHeight * speed,
     scrollTrigger: {
@@ -147,8 +161,9 @@ export function initParallax(element, speed = 0.5) {
  * @param {HTMLElement} maskElement - The mask element
  * @param {HTMLElement} contentElement - The content to reveal
  */
-export function initCrumblingWallReveal(maskElement, contentElement) {
+export async function initCrumblingWallReveal(maskElement, contentElement) {
   if (!maskElement || !contentElement) return;
+  const ScrollTrigger = await getScrollTrigger();
 
   // Create a timeline for the reveal
   const tl = gsap.timeline({
@@ -246,13 +261,15 @@ export function initMenuHover(element) {
 /**
  * Kill all ScrollTrigger animations
  */
-export function killAllScrollTriggers() {
+export async function killAllScrollTriggers() {
+  const ScrollTrigger = await getScrollTrigger();
   ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
 }
 
 /**
  * Refresh ScrollTrigger calculations
  */
-export function refreshScrollTriggers() {
+export async function refreshScrollTriggers() {
+  const ScrollTrigger = await getScrollTrigger();
   ScrollTrigger.refresh();
 }
